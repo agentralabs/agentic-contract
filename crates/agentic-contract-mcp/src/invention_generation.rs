@@ -9,9 +9,9 @@ use chrono::{DateTime, Duration, Utc};
 use serde_json::{json, Value};
 
 use agentic_contract::inventions::*;
+use agentic_contract::policy::{PolicyAction, PolicyScope};
 use agentic_contract::ContractEngine;
 use agentic_contract::ContractId;
-use agentic_contract::policy::{PolicyAction, PolicyScope};
 
 use crate::tools::{require_str, ToolDefinition};
 
@@ -171,7 +171,9 @@ struct CrystallizationPattern {
 
 const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
     CrystallizationPattern {
-        keywords: &["budget", "spending", "cost", "expense", "money", "dollar", "price"],
+        keywords: &[
+            "budget", "spending", "cost", "expense", "money", "dollar", "price",
+        ],
         scope: PolicyScope::Global,
         action: PolicyAction::RequireApproval,
         label_template: "Spending limit enforcement",
@@ -187,7 +189,9 @@ const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
         risk_limit: Some(("deployment_rate_limit", 5.0, "rate")),
     },
     CrystallizationPattern {
-        keywords: &["safe", "secure", "protect", "restrict", "lock", "guard", "shield"],
+        keywords: &[
+            "safe", "secure", "protect", "restrict", "lock", "guard", "shield",
+        ],
         scope: PolicyScope::Global,
         action: PolicyAction::Deny,
         label_template: "Restrictive safety default",
@@ -195,7 +199,9 @@ const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
         risk_limit: None,
     },
     CrystallizationPattern {
-        keywords: &["rate", "limit", "throttle", "quota", "api", "request", "call"],
+        keywords: &[
+            "rate", "limit", "throttle", "quota", "api", "request", "call",
+        ],
         scope: PolicyScope::Session,
         action: PolicyAction::Deny,
         label_template: "API rate limit enforcement",
@@ -203,7 +209,15 @@ const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
         risk_limit: Some(("api_rate_limit", 100.0, "rate")),
     },
     CrystallizationPattern {
-        keywords: &["data", "access", "read", "write", "permission", "database", "storage"],
+        keywords: &[
+            "data",
+            "access",
+            "read",
+            "write",
+            "permission",
+            "database",
+            "storage",
+        ],
         scope: PolicyScope::Agent,
         action: PolicyAction::RequireApproval,
         label_template: "Data access control",
@@ -211,7 +225,9 @@ const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
         risk_limit: None,
     },
     CrystallizationPattern {
-        keywords: &["audit", "log", "track", "monitor", "observe", "watch", "trace"],
+        keywords: &[
+            "audit", "log", "track", "monitor", "observe", "watch", "trace",
+        ],
         scope: PolicyScope::Global,
         action: PolicyAction::AuditOnly,
         label_template: "Audit trail enforcement",
@@ -219,7 +235,9 @@ const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
         risk_limit: None,
     },
     CrystallizationPattern {
-        keywords: &["delete", "remove", "destroy", "erase", "purge", "wipe", "drop"],
+        keywords: &[
+            "delete", "remove", "destroy", "erase", "purge", "wipe", "drop",
+        ],
         scope: PolicyScope::Global,
         action: PolicyAction::Deny,
         label_template: "Destructive action prevention",
@@ -227,7 +245,14 @@ const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
         risk_limit: None,
     },
     CrystallizationPattern {
-        keywords: &["admin", "root", "superuser", "elevated", "privilege", "sudo"],
+        keywords: &[
+            "admin",
+            "root",
+            "superuser",
+            "elevated",
+            "privilege",
+            "sudo",
+        ],
         scope: PolicyScope::Global,
         action: PolicyAction::RequireApproval,
         label_template: "Elevated privilege gate",
@@ -235,7 +260,14 @@ const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
         risk_limit: None,
     },
     CrystallizationPattern {
-        keywords: &["external", "third-party", "vendor", "partner", "outbound", "egress"],
+        keywords: &[
+            "external",
+            "third-party",
+            "vendor",
+            "partner",
+            "outbound",
+            "egress",
+        ],
         scope: PolicyScope::Session,
         action: PolicyAction::RequireApproval,
         label_template: "External communication control",
@@ -243,7 +275,9 @@ const CRYSTALLIZATION_PATTERNS: &[CrystallizationPattern] = &[
         risk_limit: Some(("external_request_limit", 50.0, "count")),
     },
     CrystallizationPattern {
-        keywords: &["time", "deadline", "schedule", "cron", "interval", "periodic"],
+        keywords: &[
+            "time", "deadline", "schedule", "cron", "interval", "periodic",
+        ],
         scope: PolicyScope::Global,
         action: PolicyAction::AuditOnly,
         label_template: "Temporal operation audit",
@@ -300,10 +334,7 @@ pub fn try_handle(
 
 /// Generate contract policies from a high-level intent description using
 /// NLP-like pattern matching against a library of governance patterns.
-fn handle_contract_crystallize(
-    args: Value,
-    _engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn handle_contract_crystallize(args: Value, _engine: &mut ContractEngine) -> Result<Value, String> {
     let intent = require_str(&args, "intent")?;
     let strictness = args
         .get("strictness")
@@ -331,11 +362,7 @@ fn handle_contract_crystallize(
 
     for pattern in CRYSTALLIZATION_PATTERNS {
         // Compute keyword overlap with intent
-        let keyword_set: HashSet<String> = pattern
-            .keywords
-            .iter()
-            .map(|k| k.to_string())
-            .collect();
+        let keyword_set: HashSet<String> = pattern.keywords.iter().map(|k| k.to_string()).collect();
         let intersection = intent_words.intersection(&keyword_set).count();
         if intersection == 0 {
             continue;
@@ -430,12 +457,8 @@ fn handle_contract_crystallize(
     }
 
     // Add edge case for conflicting patterns
-    let has_deny = matched_policies
-        .iter()
-        .any(|p| p.action.contains("Deny"));
-    let has_allow = matched_policies
-        .iter()
-        .any(|p| p.action.contains("Allow"));
+    let has_deny = matched_policies.iter().any(|p| p.action.contains("Deny"));
+    let has_allow = matched_policies.iter().any(|p| p.action.contains("Allow"));
     if has_deny && has_allow {
         edge_cases.push(
             "Both deny and allow policies generated — potential conflict requiring resolution"
@@ -666,8 +689,16 @@ fn handle_contract_crystallize_diff(
     let now = Utc::now();
 
     // ── Policy diff ──
-    let labels_a: HashSet<String> = contract_a.policies.iter().map(|p| p.label.clone()).collect();
-    let labels_b: HashSet<String> = contract_b.policies.iter().map(|p| p.label.clone()).collect();
+    let labels_a: HashSet<String> = contract_a
+        .policies
+        .iter()
+        .map(|p| p.label.clone())
+        .collect();
+    let labels_b: HashSet<String> = contract_b
+        .policies
+        .iter()
+        .map(|p| p.label.clone())
+        .collect();
 
     let added: Vec<Value> = contract_b
         .policies
@@ -700,8 +731,16 @@ fn handle_contract_crystallize_diff(
     let common_labels: HashSet<String> = labels_a.intersection(&labels_b).cloned().collect();
     let mut modified: Vec<Value> = Vec::new();
     for label in &common_labels {
-        let pol_a = contract_a.policies.iter().find(|p| &p.label == label).unwrap();
-        let pol_b = contract_b.policies.iter().find(|p| &p.label == label).unwrap();
+        let pol_a = contract_a
+            .policies
+            .iter()
+            .find(|p| &p.label == label)
+            .unwrap();
+        let pol_b = contract_b
+            .policies
+            .iter()
+            .find(|p| &p.label == label)
+            .unwrap();
 
         let mut changes: Vec<Value> = Vec::new();
         if pol_a.action != pol_b.action {
@@ -727,10 +766,16 @@ fn handle_contract_crystallize_diff(
     }
 
     // ── Risk limit diff ──
-    let limit_labels_a: HashSet<String> =
-        contract_a.risk_limits.iter().map(|r| r.label.clone()).collect();
-    let limit_labels_b: HashSet<String> =
-        contract_b.risk_limits.iter().map(|r| r.label.clone()).collect();
+    let limit_labels_a: HashSet<String> = contract_a
+        .risk_limits
+        .iter()
+        .map(|r| r.label.clone())
+        .collect();
+    let limit_labels_b: HashSet<String> = contract_b
+        .risk_limits
+        .iter()
+        .map(|r| r.label.clone())
+        .collect();
 
     let limits_added: Vec<Value> = contract_b
         .risk_limits
@@ -759,8 +804,10 @@ fn handle_contract_crystallize_diff(
         .collect();
 
     let mut limits_modified: Vec<Value> = Vec::new();
-    let common_limit_labels: HashSet<String> =
-        limit_labels_a.intersection(&limit_labels_b).cloned().collect();
+    let common_limit_labels: HashSet<String> = limit_labels_a
+        .intersection(&limit_labels_b)
+        .cloned()
+        .collect();
     for label in &common_limit_labels {
         let lim_a = contract_a
             .risk_limits
@@ -841,8 +888,7 @@ fn handle_contract_crystallize_validate(
 
     let mut matched_patterns: Vec<(usize, f64)> = Vec::new();
     for (idx, pattern) in CRYSTALLIZATION_PATTERNS.iter().enumerate() {
-        let keyword_set: HashSet<String> =
-            pattern.keywords.iter().map(|k| k.to_string()).collect();
+        let keyword_set: HashSet<String> = pattern.keywords.iter().map(|k| k.to_string()).collect();
         let intersection = intent_words.intersection(&keyword_set).count();
         if intersection > 0 {
             let coverage = intersection as f64 / keyword_set.len() as f64;
@@ -865,9 +911,9 @@ fn handle_contract_crystallize_validate(
     }
 
     // ── Check 2: Missing approval rules ──
-    let has_require_approval = matched_patterns.iter().any(|(idx, _)| {
-        CRYSTALLIZATION_PATTERNS[*idx].action == PolicyAction::RequireApproval
-    });
+    let has_require_approval = matched_patterns
+        .iter()
+        .any(|(idx, _)| CRYSTALLIZATION_PATTERNS[*idx].action == PolicyAction::RequireApproval);
     let has_deny = matched_patterns
         .iter()
         .any(|(idx, _)| CRYSTALLIZATION_PATTERNS[*idx].action == PolicyAction::Deny);
@@ -1019,8 +1065,7 @@ fn handle_contract_crystallize_evolve(
     let mut evolution_log: Vec<Value> = Vec::new();
 
     for pattern in CRYSTALLIZATION_PATTERNS {
-        let keyword_set: HashSet<String> =
-            pattern.keywords.iter().map(|k| k.to_string()).collect();
+        let keyword_set: HashSet<String> = pattern.keywords.iter().map(|k| k.to_string()).collect();
         let intersection = intent_words.intersection(&keyword_set).count();
         if intersection == 0 {
             continue;
@@ -1040,10 +1085,8 @@ fn handle_contract_crystallize_evolve(
         let weighted_score: f64 = related_violations
             .iter()
             .map(|v| {
-                let age_days = now
-                    .signed_duration_since(v.detected_at)
-                    .num_seconds() as f64
-                    / 86400.0;
+                let age_days =
+                    now.signed_duration_since(v.detected_at).num_seconds() as f64 / 86400.0;
                 severity_weight(&v.severity) * exponential_decay_days(age_days, 15.0)
             })
             .sum();
@@ -1175,10 +1218,7 @@ fn action_strictness_level(action: &str) -> u8 {
 
 /// Extract genetic representation of a policy: scope_breadth, restriction_level,
 /// tag_complexity, condition_depth, age_factor. Compute fitness from violations.
-fn handle_policy_dna_extract(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn handle_policy_dna_extract(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let policy_id_str = require_str(&args, "policy_id")?;
     let now = Utc::now();
 
@@ -1204,7 +1244,8 @@ fn handle_policy_dna_extract(
     let restriction_gene = PolicyGene {
         name: "restriction_level".to_string(),
         value: restriction_level_value(&policy.action),
-        dominant: policy.action == PolicyAction::Deny || policy.action == PolicyAction::RequireApproval,
+        dominant: policy.action == PolicyAction::Deny
+            || policy.action == PolicyAction::RequireApproval,
     };
 
     // Gene 3: tag_complexity (number of tags normalized, max 1.0)
@@ -1226,10 +1267,7 @@ fn handle_policy_dna_extract(
     };
 
     // Gene 5: age_factor (exponential decay: newer policies score higher)
-    let age_days = now
-        .signed_duration_since(policy.created_at)
-        .num_seconds() as f64
-        / 86400.0;
+    let age_days = now.signed_duration_since(policy.created_at).num_seconds() as f64 / 86400.0;
     let age_value = exponential_decay_days(age_days, 365.0); // 1-year half-life
     let age_gene = PolicyGene {
         name: "age_factor".to_string(),
@@ -1237,7 +1275,13 @@ fn handle_policy_dna_extract(
         dominant: age_days < 30.0,
     };
 
-    let genes = vec![scope_gene, restriction_gene, tag_gene, condition_gene, age_gene];
+    let genes = vec![
+        scope_gene,
+        restriction_gene,
+        tag_gene,
+        condition_gene,
+        age_gene,
+    ];
 
     // ── Compute fitness from violation history ──
     // Fitness = base * decay for each violation related to this policy
@@ -1245,16 +1289,16 @@ fn handle_policy_dna_extract(
         .file
         .violations
         .iter()
-        .filter(|v| v.policy_id.map_or(false, |pid| pid.to_string() == policy_id_str))
+        .filter(|v| {
+            v.policy_id
+                .map_or(false, |pid| pid.to_string() == policy_id_str)
+        })
         .collect();
 
     let base_fitness = 1.0;
     let mut fitness = base_fitness;
     for v in &related_violations {
-        let v_age_days = now
-            .signed_duration_since(v.detected_at)
-            .num_seconds() as f64
-            / 86400.0;
+        let v_age_days = now.signed_duration_since(v.detected_at).num_seconds() as f64 / 86400.0;
         // Each violation reduces fitness with exponential decay (30-day half-life)
         let penalty = severity_weight(&v.severity) * exponential_decay_days(v_age_days, 30.0);
         fitness -= penalty * 0.1;
@@ -1311,10 +1355,7 @@ fn handle_policy_dna_extract(
 
 /// Compare DNA of two policies using Euclidean distance between gene vectors.
 /// Identify dominant/recessive traits.
-fn handle_policy_dna_compare(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn handle_policy_dna_compare(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let policy_a_str = require_str(&args, "policy_a")?;
     let policy_b_str = require_str(&args, "policy_b")?;
     let now = Utc::now();
@@ -1429,18 +1470,13 @@ fn handle_policy_dna_compare(
 
 /// Simulate policy mutations: random gene perturbation, optional crossover,
 /// and fitness recalculation.
-fn handle_policy_dna_mutate(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn handle_policy_dna_mutate(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let policy_id_str = require_str(&args, "policy_id")?;
     let mutation_rate = args
         .get("mutation_rate")
         .and_then(|v| v.as_f64())
         .unwrap_or(0.3);
-    let crossover_id = args
-        .get("crossover_policy_id")
-        .and_then(|v| v.as_str());
+    let crossover_id = args.get("crossover_policy_id").and_then(|v| v.as_str());
     let now = Utc::now();
 
     // Find the primary policy
@@ -1515,11 +1551,8 @@ fn handle_policy_dna_mutate(
     // Simulate fitness: policies with moderate genes tend to be fitter
     // (extreme values are risky — too permissive or too restrictive)
     let gene_values: Vec<f64> = mutated_genes.iter().map(|g| g.value).collect();
-    let variance: f64 = gene_values
-        .iter()
-        .map(|v| (v - 0.5).powi(2))
-        .sum::<f64>()
-        / gene_values.len() as f64;
+    let variance: f64 =
+        gene_values.iter().map(|v| (v - 0.5).powi(2)).sum::<f64>() / gene_values.len() as f64;
     let balance_factor = 1.0 - variance; // Higher when genes are moderate
     let mutated_fitness = (original_fitness * 0.6 + balance_factor * 0.4).min(1.0);
 
@@ -1582,10 +1615,7 @@ fn handle_policy_dna_mutate(
 
 /// Run genetic algorithm: tournament selection, crossover, mutation over
 /// N generations. Track fitness improvement per generation.
-fn handle_policy_dna_evolve(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let generations = args
         .get("generations")
         .and_then(|v| v.as_i64())
@@ -1727,7 +1757,9 @@ fn handle_policy_dna_evolve(
             let scope = child_genes.get(0).copied().unwrap_or(0.5);
             let security_bonus = if restriction > 0.3 { 0.1 } else { 0.0 };
             let coverage_bonus = if scope > 0.3 { 0.05 } else { 0.0 };
-            let fitness = (balance_score * 0.7 + restriction * 0.15 + scope * 0.15
+            let fitness = (balance_score * 0.7
+                + restriction * 0.15
+                + scope * 0.15
                 + security_bonus
                 + coverage_bonus)
                 .min(1.0);
@@ -1779,16 +1811,25 @@ fn handle_policy_dna_evolve(
     // ── Recommendations ──
     let mut recommendations: Vec<String> = Vec::new();
     if best.genes[1] > 0.8 {
-        recommendations.push("Evolved toward high restriction — consider if this matches operational needs".to_string());
+        recommendations.push(
+            "Evolved toward high restriction — consider if this matches operational needs"
+                .to_string(),
+        );
     }
     if best.genes[0] < 0.3 {
-        recommendations.push("Evolved toward narrow scope — may miss global-level threats".to_string());
+        recommendations
+            .push("Evolved toward narrow scope — may miss global-level threats".to_string());
     }
     if total_improvement < 0.01 {
-        recommendations.push("Minimal improvement suggests current policies are already near-optimal".to_string());
+        recommendations.push(
+            "Minimal improvement suggests current policies are already near-optimal".to_string(),
+        );
     }
     if total_improvement > 0.2 {
-        recommendations.push("Significant improvement found — consider applying evolved gene values to policies".to_string());
+        recommendations.push(
+            "Significant improvement found — consider applying evolved gene values to policies"
+                .to_string(),
+        );
     }
 
     Ok(json!({
@@ -1809,10 +1850,7 @@ fn handle_policy_dna_evolve(
 
 /// Trace policy evolution lineage: find related policies by DNA similarity,
 /// build a family tree showing genetic relationships.
-fn handle_policy_dna_lineage(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn handle_policy_dna_lineage(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let policy_id_str = require_str(&args, "policy_id")?;
     let similarity_threshold = args
         .get("similarity_threshold")
@@ -1924,7 +1962,9 @@ fn handle_policy_dna_lineage(
     relatives.sort_by(|a, b| {
         let sim_a = a["similarity"].as_f64().unwrap_or(0.0);
         let sim_b = b["similarity"].as_f64().unwrap_or(0.0);
-        sim_b.partial_cmp(&sim_a).unwrap_or(std::cmp::Ordering::Equal)
+        sim_b
+            .partial_cmp(&sim_a)
+            .unwrap_or(std::cmp::Ordering::Equal)
     });
 
     // ── Lineage statistics ──
@@ -1973,14 +2013,8 @@ fn handle_policy_dna_lineage(
 // ─── DNA helper functions ────────────────────────────────────────────────────
 
 /// Extract gene vector from a policy (reusable).
-fn extract_gene_vector(
-    policy: &agentic_contract::Policy,
-    now: DateTime<Utc>,
-) -> Vec<PolicyGene> {
-    let age_days = now
-        .signed_duration_since(policy.created_at)
-        .num_seconds() as f64
-        / 86400.0;
+fn extract_gene_vector(policy: &agentic_contract::Policy, now: DateTime<Utc>) -> Vec<PolicyGene> {
+    let age_days = now.signed_duration_since(policy.created_at).num_seconds() as f64 / 86400.0;
 
     vec![
         PolicyGene {
@@ -2018,15 +2052,15 @@ fn compute_policy_fitness(engine: &ContractEngine, policy_id_str: &str, now: Dat
         .file
         .violations
         .iter()
-        .filter(|v| v.policy_id.map_or(false, |pid| pid.to_string() == policy_id_str))
+        .filter(|v| {
+            v.policy_id
+                .map_or(false, |pid| pid.to_string() == policy_id_str)
+        })
         .collect();
 
     let mut fitness = 1.0;
     for v in &related_violations {
-        let v_age_days = now
-            .signed_duration_since(v.detected_at)
-            .num_seconds() as f64
-            / 86400.0;
+        let v_age_days = now.signed_duration_since(v.detected_at).num_seconds() as f64 / 86400.0;
         let penalty = severity_weight(&v.severity) * exponential_decay_days(v_age_days, 30.0);
         fitness -= penalty * 0.1;
     }
@@ -2035,11 +2069,7 @@ fn compute_policy_fitness(engine: &ContractEngine, policy_id_str: &str, now: Dat
 
 /// Tournament selection: pick the best of k random individuals from a population.
 /// Returns the index of the winner.
-fn tournament_select(
-    fitnesses: &[f64],
-    tournament_size: usize,
-    seed: &mut u32,
-) -> usize {
+fn tournament_select(fitnesses: &[f64], tournament_size: usize, seed: &mut u32) -> usize {
     let pop_size = fitnesses.len();
     let mut best_idx = (pseudo_random(seed) * pop_size as f64) as usize % pop_size;
     let mut best_fitness = fitnesses[best_idx];
@@ -2060,8 +2090,8 @@ fn tournament_select(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use agentic_contract::{ContractEngine, Policy};
     use agentic_contract::policy::{PolicyAction, PolicyScope};
+    use agentic_contract::{ContractEngine, Policy};
     use serde_json::json;
 
     #[test]
@@ -2129,7 +2159,10 @@ mod tests {
         assert_eq!(value["total_violations_in_window"], 0);
         // With no violations and window >= 14, should see relaxed policies
         let stats = &value["statistics"];
-        assert!(stats["relaxed"].as_u64().unwrap_or(0) > 0 || stats["unchanged"].as_u64().unwrap_or(0) > 0);
+        assert!(
+            stats["relaxed"].as_u64().unwrap_or(0) > 0
+                || stats["unchanged"].as_u64().unwrap_or(0) > 0
+        );
     }
 
     #[test]
@@ -2139,11 +2172,7 @@ mod tests {
         let pid = policy.id.to_string();
         engine.add_policy(policy);
 
-        let result = try_handle(
-            "policy_dna_extract",
-            json!({"policy_id": pid}),
-            &mut engine,
-        );
+        let result = try_handle("policy_dna_extract", json!({"policy_id": pid}), &mut engine);
         assert!(result.is_some());
         let value = result.unwrap().unwrap();
         assert_eq!(value["policy_label"], "Test policy");
@@ -2180,9 +2209,15 @@ mod tests {
         let value = result.unwrap().unwrap();
         // Same scope and action should yield high similarity
         let similarity = value["similarity"].as_f64().unwrap();
-        assert!(similarity > 0.8, "Expected high similarity, got {}", similarity);
-        assert!(value["relationship"].as_str().unwrap() == "near_identical"
-            || value["relationship"].as_str().unwrap() == "closely_related");
+        assert!(
+            similarity > 0.8,
+            "Expected high similarity, got {}",
+            similarity
+        );
+        assert!(
+            value["relationship"].as_str().unwrap() == "near_identical"
+                || value["relationship"].as_str().unwrap() == "closely_related"
+        );
     }
 
     #[test]
@@ -2190,7 +2225,13 @@ mod tests {
         let mut engine = ContractEngine::new();
         let p1 = Policy::new("Strict Policy", PolicyScope::Global, PolicyAction::Deny);
         let mut p2 = Policy::new("Loose Policy", PolicyScope::Agent, PolicyAction::Allow);
-        p2.tags = vec!["tag1".into(), "tag2".into(), "tag3".into(), "tag4".into(), "tag5".into()];
+        p2.tags = vec![
+            "tag1".into(),
+            "tag2".into(),
+            "tag3".into(),
+            "tag4".into(),
+            "tag5".into(),
+        ];
         p2.conditions = vec!["cond1".into(), "cond2".into(), "cond3".into()];
         let id1 = p1.id.to_string();
         let id2 = p2.id.to_string();
@@ -2205,13 +2246,21 @@ mod tests {
         assert!(result.is_some());
         let value = result.unwrap().unwrap();
         let similarity = value["similarity"].as_f64().unwrap();
-        assert!(similarity < 0.8, "Expected lower similarity for different policies, got {}", similarity);
+        assert!(
+            similarity < 0.8,
+            "Expected lower similarity for different policies, got {}",
+            similarity
+        );
     }
 
     #[test]
     fn test_dna_mutate_basic() {
         let mut engine = ContractEngine::new();
-        let policy = Policy::new("Mutable Policy", PolicyScope::Session, PolicyAction::RequireApproval);
+        let policy = Policy::new(
+            "Mutable Policy",
+            PolicyScope::Session,
+            PolicyAction::RequireApproval,
+        );
         let pid = policy.id.to_string();
         engine.add_policy(policy);
 
@@ -2232,8 +2281,16 @@ mod tests {
     #[test]
     fn test_dna_evolve_basic() {
         let mut engine = ContractEngine::new();
-        engine.add_policy(Policy::new("Base Policy", PolicyScope::Global, PolicyAction::Deny));
-        engine.add_policy(Policy::new("Alt Policy", PolicyScope::Agent, PolicyAction::Allow));
+        engine.add_policy(Policy::new(
+            "Base Policy",
+            PolicyScope::Global,
+            PolicyAction::Deny,
+        ));
+        engine.add_policy(Policy::new(
+            "Alt Policy",
+            PolicyScope::Agent,
+            PolicyAction::Allow,
+        ));
 
         let result = try_handle(
             "policy_dna_evolve",
@@ -2253,11 +2310,7 @@ mod tests {
     #[test]
     fn test_dna_evolve_empty_policies_fails() {
         let mut engine = ContractEngine::new();
-        let result = try_handle(
-            "policy_dna_evolve",
-            json!({"generations": 3}),
-            &mut engine,
-        );
+        let result = try_handle("policy_dna_evolve", json!({"generations": 3}), &mut engine);
         assert!(result.is_some());
         assert!(result.unwrap().is_err());
     }
@@ -2357,7 +2410,10 @@ mod tests {
         // Permissive should downgrade Deny to RequireApproval
         for p in policies {
             let action = p["action"].as_str().unwrap();
-            assert_ne!(action, "Deny", "Permissive should not produce Deny policies");
+            assert_ne!(
+                action, "Deny",
+                "Permissive should not produce Deny policies"
+            );
         }
     }
 

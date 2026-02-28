@@ -387,9 +387,7 @@ fn violation_archaeology_analyze(
     // ── 2. Severity distribution ──
     let mut severity_dist: HashMap<String, u32> = HashMap::new();
     for v in &violations {
-        *severity_dist
-            .entry(format!("{}", v.severity))
-            .or_default() += 1;
+        *severity_dist.entry(format!("{}", v.severity)).or_default() += 1;
     }
 
     // ── 3. Root cause hypotheses ──
@@ -446,7 +444,10 @@ fn violation_archaeology_analyze(
     // Hypothesis: burst patterns
     let burst_threshold_secs = 60.0; // violations within 60s = burst
     let mut burst_count = 0u32;
-    let ts_list: Vec<i64> = violations.iter().map(|v| v.detected_at.timestamp()).collect();
+    let ts_list: Vec<i64> = violations
+        .iter()
+        .map(|v| v.detected_at.timestamp())
+        .collect();
     for i in 0..ts_list.len() {
         for j in (i + 1)..ts_list.len() {
             if (ts_list[j] - ts_list[i]).abs() < burst_threshold_secs as i64 {
@@ -751,9 +752,9 @@ fn violation_archaeology_predict(
     // Project forward
     let forecast_days_f = forecast_days as f64;
     let projected_rate = velocity + acceleration * forecast_days_f;
-    let projected_total =
-        (velocity * forecast_days_f + 0.5 * acceleration * forecast_days_f * forecast_days_f)
-            .max(0.0);
+    let projected_total = (velocity * forecast_days_f
+        + 0.5 * acceleration * forecast_days_f * forecast_days_f)
+        .max(0.0);
 
     // Confidence interval: +/- 1 standard deviation scaled by sqrt(days)
     let sd_daily = std_dev(
@@ -769,9 +770,7 @@ fn violation_archaeology_predict(
     // Per-severity projections
     let mut sev_counts: HashMap<String, f64> = HashMap::new();
     for v in &violations {
-        *sev_counts
-            .entry(format!("{}", v.severity))
-            .or_default() += 1.0;
+        *sev_counts.entry(format!("{}", v.severity)).or_default() += 1.0;
     }
     let mut severity_projections: HashMap<String, Value> = HashMap::new();
     for (sev, count) in &sev_counts {
@@ -855,9 +854,7 @@ fn violation_archaeology_compare(
         let mut sev_dist: HashMap<String, u32> = HashMap::new();
         let mut total_severity_weight = 0.0_f64;
         for v in &violations {
-            *sev_dist
-                .entry(format!("{}", v.severity))
-                .or_default() += 1;
+            *sev_dist.entry(format!("{}", v.severity)).or_default() += 1;
             total_severity_weight += severity_weight(&v.severity);
         }
         let avg_severity = if total > 0 {
@@ -983,10 +980,7 @@ fn run_simulation_core(engine: &ContractEngine, scenario_count: u32) -> Value {
     let risk_breach_rate = if risk_limits.is_empty() {
         0.0
     } else {
-        let near_limit = risk_limits
-            .iter()
-            .filter(|r| r.usage_ratio() > 0.8)
-            .count();
+        let near_limit = risk_limits.iter().filter(|r| r.usage_ratio() > 0.8).count();
         near_limit as f64 / risk_limits.len() as f64
     };
 
@@ -1077,8 +1071,8 @@ fn run_simulation_core(engine: &ContractEngine, scenario_count: u32) -> Value {
     } else {
         1.0 - (edge_cases.len() as f64 * 0.1).min(0.5)
     };
-    let health_score = (approval_rate * 0.3 + no_breach * 0.3 + no_deadlock * 0.2 + no_edge * 0.2)
-        .clamp(0.0, 1.0);
+    let health_score =
+        (approval_rate * 0.3 + no_breach * 0.3 + no_deadlock * 0.2 + no_edge * 0.2).clamp(0.0, 1.0);
 
     json!({
         "scenario_count": scenario_count,
@@ -1146,10 +1140,7 @@ fn contract_simulation_stress(args: Value, engine: &mut ContractEngine) -> Resul
         let effective_deny_rate = deny_rate.min(1.0);
 
         // Risk limits breach more under load
-        let base_breach_rate = risk_limits
-            .iter()
-            .filter(|r| r.usage_ratio() > 0.5)
-            .count() as f64
+        let base_breach_rate = risk_limits.iter().filter(|r| r.usage_ratio() > 0.5).count() as f64
             / risk_limits.len().max(1) as f64;
         let stress_breach_rate = (base_breach_rate * (1.0 + load_factor * 2.0)).min(1.0);
 
@@ -1238,10 +1229,7 @@ fn contract_simulation_stress(args: Value, engine: &mut ContractEngine) -> Resul
 }
 
 /// Suggest contract optimizations based on simulation.
-fn contract_simulation_optimize(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn contract_simulation_optimize(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let scenario_count = args
         .get("scenario_count")
         .and_then(|v| v.as_u64())
@@ -1357,10 +1345,7 @@ fn contract_simulation_optimize(
 }
 
 /// Compare current contract config against a hypothetical modification.
-fn contract_simulation_compare(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn contract_simulation_compare(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let now = chrono::Utc::now();
 
     // Run baseline simulation
@@ -1408,17 +1393,13 @@ fn contract_simulation_compare(
             Some("audit_only") => agentic_contract::PolicyAction::AuditOnly,
             _ => agentic_contract::PolicyAction::Deny,
         };
-        let policy = agentic_contract::Policy::new(
-            label,
-            agentic_contract::PolicyScope::Global,
-            action,
-        );
+        let policy =
+            agentic_contract::Policy::new(label, agentic_contract::PolicyScope::Global, action);
         let id = policy.id;
         engine.file.policies.push(policy);
         added_policy_id = Some(id);
         if modification_description.is_empty() {
-            modification_description =
-                format!("Added policy '{}' ({:?})", label, action);
+            modification_description = format!("Added policy '{}' ({:?})", label, action);
         } else {
             modification_description
                 .push_str(&format!(" + Added policy '{}' ({:?})", label, action));
@@ -1450,7 +1431,10 @@ fn contract_simulation_compare(
     }
     if let Some(policy) = removed_policy {
         if let Some(idx) = removed_index {
-            engine.file.policies.insert(idx.min(engine.file.policies.len()), policy);
+            engine
+                .file
+                .policies
+                .insert(idx.min(engine.file.policies.len()), policy);
         }
     }
 
@@ -1506,10 +1490,7 @@ fn contract_simulation_compare(
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// Create cross-organizational federation with trust levels.
-fn federated_governance_create(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn federated_governance_create(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let name = require_str(&args, "name")?;
     let members_arr = args
         .get("members")
@@ -1585,10 +1566,7 @@ fn federated_governance_create(
 }
 
 /// Record member ratification and check quorum.
-fn federated_governance_ratify(
-    args: Value,
-    _engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn federated_governance_ratify(args: Value, _engine: &mut ContractEngine) -> Result<Value, String> {
     let federation_id = require_str(&args, "federation_id")?;
     let member_id = require_str(&args, "member_id")?;
 
@@ -1607,10 +1585,7 @@ fn federated_governance_ratify(
 }
 
 /// Sync policies across federation members and detect conflicts.
-fn federated_governance_sync(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn federated_governance_sync(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let federation_id = require_str(&args, "federation_id")?;
     let now = chrono::Utc::now();
 
@@ -1627,9 +1602,7 @@ fn federated_governance_sync(
     for i in 0..shared_policies.len() {
         for j in (i + 1)..shared_policies.len() {
             let overlap = word_overlap(&shared_policies[i].label, &shared_policies[j].label);
-            if overlap > 0.3
-                && shared_policies[i].action != shared_policies[j].action
-            {
+            if overlap > 0.3 && shared_policies[i].action != shared_policies[j].action {
                 conflicts.push(json!({
                     "policy_a": {
                         "id": shared_policies[i].id.to_string(),
@@ -1674,10 +1647,7 @@ fn federated_governance_sync(
 }
 
 /// Audit federation compliance.
-fn federated_governance_audit(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn federated_governance_audit(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let federation_id = require_str(&args, "federation_id")?;
     let now = chrono::Utc::now();
 
@@ -1694,10 +1664,7 @@ fn federated_governance_audit(
         .count();
 
     // Risk limit compliance: % of limits not breached
-    let compliant_limits = risk_limits
-        .iter()
-        .filter(|r| r.usage_ratio() < 1.0)
-        .count();
+    let compliant_limits = risk_limits.iter().filter(|r| r.usage_ratio() < 1.0).count();
     let limit_compliance = if risk_limits.is_empty() {
         1.0
     } else {
@@ -1721,8 +1688,7 @@ fn federated_governance_audit(
         / 3.0;
 
     // Violation trend
-    let violation_rate =
-        recent_violations as f64 / 7.0; // per day
+    let violation_rate = recent_violations as f64 / 7.0; // per day
     let violation_score = (1.0 - (violation_rate * 0.2).min(1.0)).max(0.0);
 
     // Overall compliance score
@@ -1785,10 +1751,7 @@ fn federated_governance_audit(
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// Create self-healing contract with adaptive rules.
-fn self_healing_contract_create(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn self_healing_contract_create(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let base_contract_id = require_id(&args, "base_contract_id")?;
 
     // Verify base contract exists
@@ -1878,10 +1841,7 @@ fn self_healing_contract_create(
 }
 
 /// Execute a healing cycle — check all triggers against current state.
-fn self_healing_contract_heal(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn self_healing_contract_heal(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let _contract_id = require_str(&args, "contract_id")?;
     let now = chrono::Utc::now();
 
@@ -1913,12 +1873,7 @@ fn self_healing_contract_heal(
     }
 
     // ── Check trigger: PerfectRecord ──
-    let last_violation = engine
-        .file
-        .violations
-        .iter()
-        .map(|v| v.detected_at)
-        .max();
+    let last_violation = engine.file.violations.iter().map(|v| v.detected_at).max();
     let violation_free_secs = match last_violation {
         Some(last) => (now - last).num_seconds(),
         None => 86400 * 30, // default: assume 30 days clean if no violations
@@ -2002,10 +1957,7 @@ fn self_healing_contract_heal(
 }
 
 /// Get comprehensive healing status with trajectory analysis.
-fn self_healing_contract_status(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn self_healing_contract_status(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let contract_id = require_str(&args, "contract_id")?;
     let now = chrono::Utc::now();
 
@@ -2030,12 +1982,7 @@ fn self_healing_contract_status(
         .filter(|v| v.detected_at >= now - chrono::Duration::days(30))
         .count();
 
-    let last_violation = engine
-        .file
-        .violations
-        .iter()
-        .map(|v| v.detected_at)
-        .max();
+    let last_violation = engine.file.violations.iter().map(|v| v.detected_at).max();
     let time_since_last = last_violation
         .map(|lv| (now - lv).num_seconds())
         .unwrap_or(i64::MAX);
@@ -2176,9 +2123,7 @@ fn self_healing_contract_configure(
                 .get("cooldown_secs")
                 .and_then(|v| v.as_i64())
                 .unwrap_or(3600);
-            let threshold_value = args
-                .get("threshold_value")
-                .and_then(|v| v.as_f64());
+            let threshold_value = args.get("threshold_value").and_then(|v| v.as_f64());
 
             // Validate: no contradictory rules (tighten + relax on same trigger)
             let contradicts = match (trigger_type, healing_action) {
@@ -2261,12 +2206,8 @@ fn self_healing_contract_configure(
             if let Some(new_action) = args.get("healing_action").and_then(|v| v.as_str()) {
                 // Validate no contradictions
                 let contradicts = match (trigger_type, new_action) {
-                    ("repeated_violation", "relax") => {
-                        Some("Cannot relax on repeated violations")
-                    }
-                    ("perfect_record", "tighten") => {
-                        Some("Cannot tighten on perfect record")
-                    }
+                    ("repeated_violation", "relax") => Some("Cannot relax on repeated violations"),
+                    ("perfect_record", "tighten") => Some("Cannot tighten on perfect record"),
                     _ => None,
                 };
                 if let Some(reason) = contradicts {
@@ -2343,10 +2284,22 @@ mod tests {
 
     #[test]
     fn test_severity_weight_values() {
-        assert!((severity_weight(&agentic_contract::ViolationSeverity::Info) - 0.1).abs() < f64::EPSILON);
-        assert!((severity_weight(&agentic_contract::ViolationSeverity::Warning) - 0.4).abs() < f64::EPSILON);
-        assert!((severity_weight(&agentic_contract::ViolationSeverity::Critical) - 0.8).abs() < f64::EPSILON);
-        assert!((severity_weight(&agentic_contract::ViolationSeverity::Fatal) - 1.0).abs() < f64::EPSILON);
+        assert!(
+            (severity_weight(&agentic_contract::ViolationSeverity::Info) - 0.1).abs()
+                < f64::EPSILON
+        );
+        assert!(
+            (severity_weight(&agentic_contract::ViolationSeverity::Warning) - 0.4).abs()
+                < f64::EPSILON
+        );
+        assert!(
+            (severity_weight(&agentic_contract::ViolationSeverity::Critical) - 0.8).abs()
+                < f64::EPSILON
+        );
+        assert!(
+            (severity_weight(&agentic_contract::ViolationSeverity::Fatal) - 1.0).abs()
+                < f64::EPSILON
+        );
     }
 
     #[test]
@@ -2497,11 +2450,7 @@ mod tests {
     #[test]
     fn test_simulation_compare_no_modification() {
         let mut engine = ContractEngine::new();
-        let result = try_handle(
-            "contract_simulation_compare",
-            json!({}),
-            &mut engine,
-        );
+        let result = try_handle("contract_simulation_compare", json!({}), &mut engine);
         assert!(result.is_some());
         let value = result.unwrap().unwrap();
         assert_eq!(value["recommendation"], "neutral");
@@ -2519,9 +2468,7 @@ mod tests {
         let value = result.unwrap().unwrap();
         // Perfect record should fire
         let events = value["healing_events"].as_array().unwrap();
-        let has_perfect_record = events
-            .iter()
-            .any(|e| e["trigger"] == "perfect_record");
+        let has_perfect_record = events.iter().any(|e| e["trigger"] == "perfect_record");
         assert!(has_perfect_record);
     }
 

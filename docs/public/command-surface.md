@@ -4,7 +4,7 @@ status: stable
 
 # Command Surface
 
-## MCP Tools (38)
+## MCP Tools (50)
 
 | Tool | Parameters | Description |
 |------|-----------|-------------|
@@ -30,6 +30,18 @@ status: stable
 | `violation_report` | `description`, `severity?`, `agent_id?` | Report a contract or policy violation |
 | `contract_context_log` | `intent`, `topic?` | Log the intent and context behind a contract action |
 | `contract_stats` | — | Get summary statistics for the contract store |
+| `contract_ground` | `claim`, `threshold?` | Verify a claim has contract backing |
+| `contract_evidence` | `query`, `max_results?` | Get detailed evidence for a contract query |
+| `contract_suggest` | `query`, `limit?` | Suggest similar contract records |
+| `contract_workspace_create` | `workspace` | Create a multi-contract workspace |
+| `contract_workspace_add` | `workspace`, `path`, `role?`, `label?` | Add an `.acon` context file to workspace |
+| `contract_workspace_list` | `workspace` | List contexts in a workspace |
+| `contract_workspace_query` | `workspace`, `query`, `max_per_context?` | Query across workspace contexts |
+| `contract_workspace_compare` | `workspace`, `item`, `max_per_context?` | Compare an item across contexts |
+| `contract_workspace_xref` | `workspace`, `item` | Cross-reference item presence across contexts |
+| `session_start` | `session_id?`, `metadata?` | Start a contract session |
+| `session_end` | `session_id?` | End a contract session |
+| `contract_session_resume` | `limit?` | Resume recent session context |
 
 ### Advanced Tools (16)
 
@@ -56,6 +68,19 @@ status: stable
 
 | Command | Description |
 |---------|-------------|
+| `acon init` | Initialize a new `.acon` file |
+| `acon query` | Query contract records by type/text/status |
+| `acon export` | Export contract records as JSON |
+| `acon ground` | Verify claim grounding in contract state |
+| `acon evidence` | Return supporting evidence rows |
+| `acon suggest` | Return similar/suggested rows |
+| `acon workspace create` | Create workspace label |
+| `acon workspace add` | Add `.acon` file to workspace |
+| `acon workspace list` | List workspace contexts |
+| `acon workspace query` | Query across workspace contexts |
+| `acon workspace compare` | Compare item across contexts |
+| `acon workspace xref` | Cross-reference item presence |
+| `acon runtime-sync` | Scan `.acon` files and emit sync snapshot |
 | `acon policy add` | Add a policy |
 | `acon policy check` | Check action against policies |
 | `acon policy list` | List policies |

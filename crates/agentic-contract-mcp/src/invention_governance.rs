@@ -97,7 +97,8 @@ pub const TOOL_DEFS: &[ToolDefinition] = &[
     },
     ToolDefinition {
         name: "contract_inheritance_resolve",
-        description: "Resolve the effective policy for a given scope by walking the inheritance chain",
+        description:
+            "Resolve the effective policy for a given scope by walking the inheritance chain",
         input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to resolve effective rules for"},"scope":{"type":"string","description":"Scope context for resolution","default":"global"}},"required":["policy_id"]}"#,
     },
     ToolDefinition {
@@ -235,10 +236,7 @@ fn compute_trust_from_violations(
     agent_id: &str,
     now: DateTime<Utc>,
 ) -> (f64, f64, usize) {
-    let agent_violations: Vec<_> = violations
-        .iter()
-        .filter(|v| v.actor == agent_id)
-        .collect();
+    let agent_violations: Vec<_> = violations.iter().filter(|v| v.actor == agent_id).collect();
 
     if agent_violations.is_empty() {
         return (1.0, 0.0, 0);
@@ -377,10 +375,7 @@ fn build_trust_gradient(engine: &ContractEngine, agent_id: &str, action: &str) -
         .file
         .violations
         .iter()
-        .filter(|v| {
-            v.actor == agent_id
-                && now.signed_duration_since(v.detected_at).num_days() < 7
-        })
+        .filter(|v| v.actor == agent_id && now.signed_duration_since(v.detected_at).num_days() < 7)
         .count();
     let older_violations = engine
         .file
@@ -651,9 +646,7 @@ pub fn try_handle(
         "contract_inheritance_create" => Some(handle_contract_inheritance_create(args, engine)),
         "contract_inheritance_tree" => Some(handle_contract_inheritance_tree(args, engine)),
         "contract_inheritance_resolve" => Some(handle_contract_inheritance_resolve(args, engine)),
-        "contract_inheritance_override" => {
-            Some(handle_contract_inheritance_override(args, engine))
-        }
+        "contract_inheritance_override" => Some(handle_contract_inheritance_override(args, engine)),
 
         // ── Invention 12: Smart Escalation ─────────────────────────────
         "smart_escalation_route" => Some(handle_smart_escalation_route(args, engine)),
@@ -714,11 +707,7 @@ fn handle_trust_gradient_history(
     let (initial_trust, _, _) = if violations_before_window.is_empty() {
         (1.0, 0.0, 0)
     } else {
-        compute_trust_from_violations(
-            &engine.file.violations,
-            agent_id,
-            window_start,
-        )
+        compute_trust_from_violations(&engine.file.violations, agent_id, window_start)
     };
 
     time_series.push(json!({
@@ -762,7 +751,10 @@ fn handle_trust_gradient_history(
     // Compute overall trend
     let trend = if time_series.len() >= 3 {
         let first = time_series[0]["trust_score"].as_f64().unwrap_or(1.0);
-        let last = time_series.last().and_then(|v| v["trust_score"].as_f64()).unwrap_or(1.0);
+        let last = time_series
+            .last()
+            .and_then(|v| v["trust_score"].as_f64())
+            .unwrap_or(1.0);
         last - first
     } else {
         0.0
@@ -802,10 +794,7 @@ fn handle_trust_gradient_predict(
         .file
         .violations
         .iter()
-        .filter(|v| {
-            v.actor == agent_id
-                && now.signed_duration_since(v.detected_at).num_days() < 30
-        })
+        .filter(|v| v.actor == agent_id && now.signed_duration_since(v.detected_at).num_days() < 30)
         .count();
     let violation_velocity = recent_violations as f64 / 4.0; // per week
 
@@ -816,8 +805,7 @@ fn handle_trust_gradient_predict(
             .violations
             .iter()
             .filter(|v| {
-                v.actor == agent_id
-                    && now.signed_duration_since(v.detected_at).num_days() < 30
+                v.actor == agent_id && now.signed_duration_since(v.detected_at).num_days() < 30
             })
             .map(|v| severity_weight(&v.severity))
             .sum::<f64>()
@@ -948,10 +936,8 @@ fn handle_trust_gradient_compare(
     let trust_a = gradient_a["trust_factor"].as_f64().unwrap_or(0.0);
     let trust_b = gradient_b["trust_factor"].as_f64().unwrap_or(0.0);
 
-    let (_, _, violations_a) =
-        compute_trust_from_violations(&engine.file.violations, agent_a, now);
-    let (_, _, violations_b) =
-        compute_trust_from_violations(&engine.file.violations, agent_b, now);
+    let (_, _, violations_a) = compute_trust_from_violations(&engine.file.violations, agent_a, now);
+    let (_, _, violations_b) = compute_trust_from_violations(&engine.file.violations, agent_b, now);
 
     let approval_a = compute_approval_track_record(
         &engine.file.approval_requests,
@@ -1056,10 +1042,7 @@ fn handle_collective_contract_create(
         .filter_map(|p| {
             let id = p.get("id").and_then(|v| v.as_str())?;
             let name = p.get("name").and_then(|v| v.as_str())?;
-            let role = p
-                .get("role")
-                .and_then(|v| v.as_str())
-                .unwrap_or("member");
+            let role = p.get("role").and_then(|v| v.as_str()).unwrap_or("member");
             Some(CollectivePartyRecord {
                 party_id: id.to_string(),
                 name: name.to_string(),
@@ -1086,17 +1069,14 @@ fn handle_collective_contract_create(
         .unwrap_or(0.5)
         .clamp(0.0, 1.0);
 
-    let required_signatures =
-        ((parties.len() as f64 * quorum_ratio).ceil() as u32).max(1);
+    let required_signatures = ((parties.len() as f64 * quorum_ratio).ceil() as u32).max(1);
 
     // Gather shared policies from engine
     let shared_policy_ids: Vec<ContractId> = engine
         .file
         .policies
         .iter()
-        .filter(|p| {
-            p.is_active() && p.scope == agentic_contract::PolicyScope::Global
-        })
+        .filter(|p| p.is_active() && p.scope == agentic_contract::PolicyScope::Global)
         .map(|p| p.id)
         .collect();
 
@@ -1249,25 +1229,22 @@ fn handle_collective_contract_status(
         })
         .collect();
 
-    let age_secs = now
-        .signed_duration_since(contract.created_at)
-        .num_seconds();
+    let age_secs = now.signed_duration_since(contract.created_at).num_seconds();
 
     // Estimate time to full signature based on signing velocity
-    let estimated_completion_secs = if contract.signatures > 0 && contract.signatures < contract.parties.len() as u32 {
-        let secs_per_sig = age_secs as f64 / contract.signatures as f64;
-        let remaining = contract.parties.len() as u32 - contract.signatures;
-        Some((secs_per_sig * remaining as f64) as i64)
-    } else {
-        None
-    };
+    let estimated_completion_secs =
+        if contract.signatures > 0 && contract.signatures < contract.parties.len() as u32 {
+            let secs_per_sig = age_secs as f64 / contract.signatures as f64;
+            let remaining = contract.parties.len() as u32 - contract.signatures;
+            Some((secs_per_sig * remaining as f64) as i64)
+        } else {
+            None
+        };
 
     // Stall risk: high if no signatures after 24 hours
     let stall_risk = if contract.signatures == 0 && age_secs > 86400 {
         "high"
-    } else if contract.signatures < contract.required_signatures
-        && age_secs > 172800
-    {
+    } else if contract.signatures < contract.required_signatures && age_secs > 172800 {
         "medium"
     } else {
         "low"
@@ -1347,16 +1324,12 @@ fn handle_collective_contract_arbitrate(
                 relevant_policies.len()
             )
         }
-        "unanimous" => {
-            "All parties must agree on resolution. Schedule mediation session \
+        "unanimous" => "All parties must agree on resolution. Schedule mediation session \
              to reach consensus."
-                .to_string()
-        }
-        "third_party" => {
-            "Refer dispute to designated third-party arbitrator. Both parties \
+            .to_string(),
+        "third_party" => "Refer dispute to designated third-party arbitrator. Both parties \
              must submit evidence within 72 hours."
-                .to_string()
-        }
+            .to_string(),
         "automated" => {
             if relevant_policies.is_empty() {
                 "No directly relevant policies found. Recommend adding specific \
@@ -1707,8 +1680,8 @@ fn handle_temporal_contract_predict(
         .find(|c| c.id == contract_id)
         .ok_or_else(|| format!("Temporal contract not found: {}", contract_id))?;
 
-    let current_level = parse_governance_level(&contract.current_level)
-        .unwrap_or(GovernanceLevel::Conservative);
+    let current_level =
+        parse_governance_level(&contract.current_level).unwrap_or(GovernanceLevel::Conservative);
     let current_ordinal = governance_ordinal(&current_level);
 
     if contract.performance_history.is_empty() {
@@ -1956,10 +1929,7 @@ fn handle_contract_inheritance_tree(
                 })
             });
 
-        let children_records: Vec<_> = store
-            .iter()
-            .filter(|r| r.parent_id == policy_id)
-            .collect();
+        let children_records: Vec<_> = store.iter().filter(|r| r.parent_id == policy_id).collect();
 
         let children: Vec<Value> = if depth < max_depth {
             children_records
@@ -1968,18 +1938,9 @@ fn handle_contract_inheritance_tree(
                     let mut child_node =
                         build_tree_node(r.child_id, store, engine, depth + 1, max_depth);
                     if let Some(obj) = child_node.as_object_mut() {
-                        obj.insert(
-                            "inheritance_id".to_string(),
-                            json!(r.id.to_string()),
-                        );
-                        obj.insert(
-                            "propagate_changes".to_string(),
-                            json!(r.propagate_changes),
-                        );
-                        obj.insert(
-                            "override_count".to_string(),
-                            json!(r.overrides.len()),
-                        );
+                        obj.insert("inheritance_id".to_string(), json!(r.id.to_string()));
+                        obj.insert("propagate_changes".to_string(), json!(r.propagate_changes));
+                        obj.insert("override_count".to_string(), json!(r.overrides.len()));
                     }
                     child_node
                 })
@@ -2150,9 +2111,9 @@ fn handle_contract_inheritance_override(
         }
         other => {
             return Err(format!(
-                "Unknown override_type: {}. Use: allow_additional, restrict_further, modify_parameters",
-                other
-            ))
+            "Unknown override_type: {}. Use: allow_additional, restrict_further, modify_parameters",
+            other
+        ))
         }
     };
 
@@ -2166,8 +2127,8 @@ fn handle_contract_inheritance_override(
         .ok_or_else(|| format!("Inheritance record not found: {}", inheritance_id))?;
 
     // Verify the policy is in the inheritance chain
-    let policy_in_chain = record.parent_id == policy_id
-        || record.inherited_policy_ids.contains(&policy_id);
+    let policy_in_chain =
+        record.parent_id == policy_id || record.inherited_policy_ids.contains(&policy_id);
 
     if !policy_in_chain {
         return Err(format!(
@@ -2275,7 +2236,9 @@ fn handle_smart_escalation_route(
             };
 
             // Composite score
-            let score = urgency * approver.availability * response_factor
+            let score = urgency
+                * approver.availability
+                * response_factor
                 * approver.approval_rate
                 * (0.5 + domain_score * 0.5);
 
@@ -2320,8 +2283,7 @@ fn handle_smart_escalation_route(
 
     // Also compute from actual engine approval data
     let actual_response_times = compute_actual_response_times(engine, &best.id);
-    let estimated_response_secs = actual_response_times
-        .unwrap_or(best.avg_response_secs);
+    let estimated_response_secs = actual_response_times.unwrap_or(best.avg_response_secs);
 
     // Urgency bucket
     let urgency_bucket = if urgency >= config.urgency_thresholds.critical {
@@ -2460,9 +2422,7 @@ fn handle_smart_escalation_history(
     // Bottleneck identification
     let bottlenecks: Vec<Value> = decider_summaries
         .iter()
-        .filter(|d| {
-            d["is_bottleneck"].as_bool().unwrap_or(false)
-        })
+        .filter(|d| d["is_bottleneck"].as_bool().unwrap_or(false))
         .cloned()
         .collect();
 
@@ -2530,8 +2490,7 @@ fn handle_smart_escalation_predict(
     }
 
     // If we have data, compute statistics
-    let (mean_response, median_response, p95_response, confidence) = if !response_times.is_empty()
-    {
+    let (mean_response, median_response, p95_response, confidence) = if !response_times.is_empty() {
         response_times.sort();
         let n = response_times.len();
         let mean = response_times.iter().sum::<i64>() / n as i64;
@@ -2546,20 +2505,13 @@ fn handle_smart_escalation_predict(
             .and_then(|id| config.approvers.iter().find(|a| a.id == id))
             .or_else(|| config.approvers.first());
 
-        let base_response = approver
-            .map(|a| a.avg_response_secs)
-            .unwrap_or(600);
+        let base_response = approver.map(|a| a.avg_response_secs).unwrap_or(600);
 
         // Adjust for urgency
         let urgency_factor = 1.0 + (1.0 - urgency) * 2.0; // higher urgency = faster
         let adjusted = (base_response as f64 * urgency_factor) as i64;
 
-        (
-            adjusted,
-            adjusted,
-            (adjusted as f64 * 1.5) as i64,
-            0.3,
-        )
+        (adjusted, adjusted, (adjusted as f64 * 1.5) as i64, 0.3)
     };
 
     // Compute confidence interval
@@ -2660,7 +2612,10 @@ fn handle_smart_escalation_configure(
     }
 
     if changes.is_empty() {
-        changes.push("No changes applied. Provide add_approvers, urgency_thresholds, or timeout_secs.".to_string());
+        changes.push(
+            "No changes applied. Provide add_approvers, urgency_thresholds, or timeout_secs."
+                .to_string(),
+        );
     }
 
     Ok(json!({
@@ -2801,9 +2756,18 @@ mod tests {
     #[test]
     fn test_severity_weight_ordering() {
         use agentic_contract::ViolationSeverity;
-        assert!(severity_weight(&ViolationSeverity::Fatal) > severity_weight(&ViolationSeverity::Critical));
-        assert!(severity_weight(&ViolationSeverity::Critical) > severity_weight(&ViolationSeverity::Warning));
-        assert!(severity_weight(&ViolationSeverity::Warning) > severity_weight(&ViolationSeverity::Info));
+        assert!(
+            severity_weight(&ViolationSeverity::Fatal)
+                > severity_weight(&ViolationSeverity::Critical)
+        );
+        assert!(
+            severity_weight(&ViolationSeverity::Critical)
+                > severity_weight(&ViolationSeverity::Warning)
+        );
+        assert!(
+            severity_weight(&ViolationSeverity::Warning)
+                > severity_weight(&ViolationSeverity::Info)
+        );
     }
 
     #[test]
@@ -2868,13 +2832,11 @@ mod tests {
 
     #[test]
     fn test_trust_from_violations_with_violations() {
-        let mut violations = vec![
-            agentic_contract::Violation::new(
-                "Test violation",
-                agentic_contract::ViolationSeverity::Warning,
-                "agent_1",
-            ),
-        ];
+        let mut violations = vec![agentic_contract::Violation::new(
+            "Test violation",
+            agentic_contract::ViolationSeverity::Warning,
+            "agent_1",
+        )];
         // Set detected_at to now for predictable test
         violations[0].detected_at = Utc::now();
 
@@ -2887,13 +2849,11 @@ mod tests {
 
     #[test]
     fn test_trust_from_violations_different_agent() {
-        let violations = vec![
-            agentic_contract::Violation::new(
-                "Test violation",
-                agentic_contract::ViolationSeverity::Critical,
-                "agent_other",
-            ),
-        ];
+        let violations = vec![agentic_contract::Violation::new(
+            "Test violation",
+            agentic_contract::ViolationSeverity::Critical,
+            "agent_other",
+        )];
 
         let (trust, _, count) = compute_trust_from_violations(&violations, "agent_1", Utc::now());
         assert_eq!(trust, 1.0);
@@ -2906,17 +2866,15 @@ mod tests {
         let id_b = ContractId::new();
         let id_c = ContractId::new();
 
-        let records = vec![
-            InheritanceRecord {
-                id: ContractId::new(),
-                parent_id: id_a,
-                child_id: id_b,
-                inherited_policy_ids: vec![id_a],
-                overrides: vec![],
-                propagate_changes: true,
-                created_at: Utc::now(),
-            },
-        ];
+        let records = vec![InheritanceRecord {
+            id: ContractId::new(),
+            parent_id: id_a,
+            child_id: id_b,
+            inherited_policy_ids: vec![id_a],
+            overrides: vec![],
+            propagate_changes: true,
+            created_at: Utc::now(),
+        }];
 
         assert!(!has_circular_inheritance(&records, id_c, id_b));
     }
@@ -2926,17 +2884,15 @@ mod tests {
         let id_a = ContractId::new();
         let id_b = ContractId::new();
 
-        let records = vec![
-            InheritanceRecord {
-                id: ContractId::new(),
-                parent_id: id_a,
-                child_id: id_b,
-                inherited_policy_ids: vec![id_a],
-                overrides: vec![],
-                propagate_changes: true,
-                created_at: Utc::now(),
-            },
-        ];
+        let records = vec![InheritanceRecord {
+            id: ContractId::new(),
+            parent_id: id_a,
+            child_id: id_b,
+            inherited_policy_ids: vec![id_a],
+            overrides: vec![],
+            propagate_changes: true,
+            created_at: Utc::now(),
+        }];
 
         // Adding id_b as parent of id_a would create A->B->A cycle
         assert!(has_circular_inheritance(&records, id_a, id_b));

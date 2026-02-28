@@ -13,6 +13,106 @@ use crate::prompts;
 use crate::stdio::{validate_jsonrpc, StdioTransport, TransportError};
 use crate::tools;
 
+#[derive(Debug, Clone)]
+struct RuntimeConfig {
+    auto_capture_mode: String,
+    auto_capture_redact: bool,
+    auto_capture_max_chars: usize,
+    storage_budget_mode: String,
+    storage_budget_bytes: u64,
+    storage_budget_horizon_years: u32,
+    storage_budget_target_fraction: f64,
+}
+
+impl RuntimeConfig {
+    fn from_env() -> Self {
+        Self {
+            auto_capture_mode: env_with_fallback("ACON_AUTO_CAPTURE_MODE", "AUTO_CAPTURE_MODE")
+                .unwrap_or_else(|| "summary".to_string()),
+            auto_capture_redact: env_with_fallback(
+                "ACON_AUTO_CAPTURE_REDACT",
+                "AUTO_CAPTURE_REDACT",
+            )
+            .map(|v| parse_bool(&v))
+            .unwrap_or(true),
+            auto_capture_max_chars: env_with_fallback(
+                "ACON_AUTO_CAPTURE_MAX_CHARS",
+                "AUTO_CAPTURE_MAX_CHARS",
+            )
+            .and_then(|v| v.parse::<usize>().ok())
+            .unwrap_or(768),
+            storage_budget_mode: env_with_fallback(
+                "ACON_STORAGE_BUDGET_MODE",
+                "STORAGE_BUDGET_MODE",
+            )
+            .unwrap_or_else(|| "auto-rollup".to_string()),
+            storage_budget_bytes: env_with_fallback(
+                "ACON_STORAGE_BUDGET_BYTES",
+                "STORAGE_BUDGET_BYTES",
+            )
+            .and_then(|v| v.parse::<u64>().ok())
+            .unwrap_or(536_870_912),
+            storage_budget_horizon_years: env_with_fallback(
+                "ACON_STORAGE_BUDGET_HORIZON_YEARS",
+                "STORAGE_BUDGET_HORIZON_YEARS",
+            )
+            .and_then(|v| v.parse::<u32>().ok())
+            .unwrap_or(5),
+            storage_budget_target_fraction: env_with_fallback(
+                "ACON_STORAGE_BUDGET_TARGET_FRACTION",
+                "STORAGE_BUDGET_TARGET_FRACTION",
+            )
+            .and_then(|v| v.parse::<f64>().ok())
+            .unwrap_or(0.85),
+        }
+    }
+
+    fn as_json(&self) -> Value {
+        json!({
+            "auto_capture_mode": self.auto_capture_mode,
+            "auto_capture_redact": self.auto_capture_redact,
+            "auto_capture_max_chars": self.auto_capture_max_chars,
+            "storage_budget_mode": self.storage_budget_mode,
+            "storage_budget_bytes": self.storage_budget_bytes,
+            "storage_budget_horizon_years": self.storage_budget_horizon_years,
+            "storage_budget_target_fraction": self.storage_budget_target_fraction
+        })
+    }
+
+    fn enforce_storage_budget(&self, acon_path: &PathBuf) -> Result<(), String> {
+        if self.storage_budget_mode.eq_ignore_ascii_case("off") {
+            return Ok(());
+        }
+        let metadata = std::fs::metadata(acon_path).map_err(|e| e.to_string())?;
+        let used = metadata.len();
+        let threshold =
+            (self.storage_budget_bytes as f64 * self.storage_budget_target_fraction).round() as u64;
+        if used > threshold {
+            tracing::warn!(
+                "storage budget near/exceeded: used={} threshold={} mode={} horizon_years={}",
+                used,
+                threshold,
+                self.storage_budget_mode,
+                self.storage_budget_horizon_years
+            );
+        }
+        Ok(())
+    }
+}
+
+fn env_with_fallback(primary: &str, fallback: &str) -> Option<String> {
+    std::env::var(primary)
+        .ok()
+        .or_else(|| std::env::var(fallback).ok())
+}
+
+fn parse_bool(v: &str) -> bool {
+    matches!(
+        v.trim().to_ascii_lowercase().as_str(),
+        "1" | "true" | "yes" | "on"
+    )
+}
+
 /// Check AGENTIC_TOKEN for server-mode authentication.
 fn check_server_auth() -> Result<(), Box<dyn std::error::Error>> {
     let is_server_mode = std::env::var("AGENTRA_RUNTIME_MODE")
@@ -49,6 +149,8 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
         std::fs::create_dir_all(parent)?;
     }
 
+    let runtime = RuntimeConfig::from_env();
+
     // Print startup greeting to stderr (MCP uses stdout for JSON-RPC)
     greeting::print_greeting();
 
@@ -62,6 +164,10 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("AgenticContract MCP server started");
 
     loop {
+        if let Err(e) = runtime.enforce_storage_budget(&acon_path) {
+            tracing::warn!("storage budget check failed: {}", e);
+        }
+
         let msg = match transport.read_message() {
             Ok(m) => m,
             Err(TransportError::Io(ref e)) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
@@ -121,7 +227,8 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
                         "serverInfo": {
                             "name": "agentic-contract",
                             "version": env!("CARGO_PKG_VERSION")
-                        }
+                        },
+                        "runtimeConfig": runtime.as_json()
                     }
                 })
             }
@@ -160,10 +267,18 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
 
                 // Check if tool exists in core tools or any invention module
                 let tool_exists = tools::TOOLS.iter().any(|t| t.name == tool_name)
-                    || invention_visibility::TOOL_DEFS.iter().any(|t| t.name == tool_name)
-                    || invention_generation::TOOL_DEFS.iter().any(|t| t.name == tool_name)
-                    || invention_governance::TOOL_DEFS.iter().any(|t| t.name == tool_name)
-                    || invention_resilience::TOOL_DEFS.iter().any(|t| t.name == tool_name);
+                    || invention_visibility::TOOL_DEFS
+                        .iter()
+                        .any(|t| t.name == tool_name)
+                    || invention_generation::TOOL_DEFS
+                        .iter()
+                        .any(|t| t.name == tool_name)
+                    || invention_governance::TOOL_DEFS
+                        .iter()
+                        .any(|t| t.name == tool_name)
+                    || invention_resilience::TOOL_DEFS
+                        .iter()
+                        .any(|t| t.name == tool_name);
 
                 if !tool_exists {
                     json!({
@@ -176,10 +291,29 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
                     })
                 } else {
                     // Try invention modules first, then fall back to core tools
-                    let result = invention_visibility::try_handle(tool_name, args.clone(), &mut engine)
-                        .or_else(|| invention_generation::try_handle(tool_name, args.clone(), &mut engine))
-                        .or_else(|| invention_governance::try_handle(tool_name, args.clone(), &mut engine))
-                        .or_else(|| invention_resilience::try_handle(tool_name, args.clone(), &mut engine));
+                    let result =
+                        invention_visibility::try_handle(tool_name, args.clone(), &mut engine)
+                            .or_else(|| {
+                                invention_generation::try_handle(
+                                    tool_name,
+                                    args.clone(),
+                                    &mut engine,
+                                )
+                            })
+                            .or_else(|| {
+                                invention_governance::try_handle(
+                                    tool_name,
+                                    args.clone(),
+                                    &mut engine,
+                                )
+                            })
+                            .or_else(|| {
+                                invention_resilience::try_handle(
+                                    tool_name,
+                                    args.clone(),
+                                    &mut engine,
+                                )
+                            });
 
                     let tool_result = match result {
                         Some(r) => r,

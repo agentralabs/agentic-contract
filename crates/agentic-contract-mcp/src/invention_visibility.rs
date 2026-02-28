@@ -12,9 +12,9 @@ use chrono::{Duration, Utc};
 use serde_json::{json, Value};
 
 use agentic_contract::inventions::*;
+use agentic_contract::policy::{PolicyAction, PolicyScope};
 use agentic_contract::ContractEngine;
 use agentic_contract::ContractId;
-use agentic_contract::policy::{PolicyAction, PolicyScope};
 
 use crate::tools::{require_id, require_str, ToolDefinition};
 
@@ -164,17 +164,13 @@ pub fn try_handle(
         "obligation_clairvoyance_workload" => {
             Some(handle_obligation_clairvoyance_workload(args, engine))
         }
-        "obligation_clairvoyance_risk" => {
-            Some(handle_obligation_clairvoyance_risk(args, engine))
-        }
+        "obligation_clairvoyance_risk" => Some(handle_obligation_clairvoyance_risk(args, engine)),
 
         // ── Invention 5: Violation Precognition ───────────────────────
         "violation_precognition_analyze" => {
             Some(handle_violation_precognition_analyze(args, engine))
         }
-        "violation_precognition_batch" => {
-            Some(handle_violation_precognition_batch(args, engine))
-        }
+        "violation_precognition_batch" => Some(handle_violation_precognition_batch(args, engine)),
         "violation_precognition_alternatives" => {
             Some(handle_violation_precognition_alternatives(args, engine))
         }
@@ -285,10 +281,7 @@ fn compute_trend_rate(
 }
 
 /// Estimate approval probability based on historical approval decisions.
-fn estimate_approval_probability(
-    engine: &ContractEngine,
-    action: &str,
-) -> (f64, Vec<String>, i64) {
+fn estimate_approval_probability(engine: &ContractEngine, action: &str) -> (f64, Vec<String>, i64) {
     let approvals = engine.list_approval_requests(None);
 
     let mut total = 0u32;
@@ -317,7 +310,11 @@ fn estimate_approval_probability(
 
     let mut likely_approvers: Vec<(String, u32)> = approvers.into_iter().collect();
     likely_approvers.sort_by(|a, b| b.1.cmp(&a.1));
-    let top_approvers: Vec<String> = likely_approvers.into_iter().take(3).map(|(k, _)| k).collect();
+    let top_approvers: Vec<String> = likely_approvers
+        .into_iter()
+        .take(3)
+        .map(|(k, _)| k)
+        .collect();
 
     let avg_response = if response_times.is_empty() {
         3600 // Default 1 hour
@@ -442,10 +439,7 @@ fn handle_policy_omniscience_query(
     engine: &mut ContractEngine,
 ) -> Result<Value, String> {
     let agent_id = require_str(&args, "agent_id")?;
-    let context = args
-        .get("context")
-        .and_then(|v| v.as_str())
-        .unwrap_or("*");
+    let context = args.get("context").and_then(|v| v.as_str()).unwrap_or("*");
     let include_inactive = args
         .get("include_inactive")
         .and_then(|v| v.as_bool())
@@ -537,10 +531,7 @@ fn handle_policy_omniscience_diff(
 ) -> Result<Value, String> {
     let agent_a = require_str(&args, "agent_a")?;
     let agent_b = require_str(&args, "agent_b")?;
-    let context = args
-        .get("context")
-        .and_then(|v| v.as_str())
-        .unwrap_or("*");
+    let context = args.get("context").and_then(|v| v.as_str()).unwrap_or("*");
 
     let policies = engine.list_policies(None);
 
@@ -710,9 +701,8 @@ fn handle_policy_omniscience_coverage(
 
     // Coverage score: higher when more scopes and action types are covered
     let scope_coverage = {
-        let covered = (global_count > 0) as u32
-            + (session_count > 0) as u32
-            + (agent_count > 0) as u32;
+        let covered =
+            (global_count > 0) as u32 + (session_count > 0) as u32 + (agent_count > 0) as u32;
         covered as f64 / 3.0
     };
     let action_coverage = {
@@ -806,17 +796,14 @@ fn handle_policy_omniscience_conflicts(
 
             if is_conflict || is_ambiguous {
                 let severity = if is_conflict { "conflict" } else { "ambiguous" };
-                let resolution = if pa.scope == PolicyScope::Agent
-                    && pb.scope == PolicyScope::Global
-                {
-                    "Agent-scope policy takes precedence over global"
-                } else if pa.scope == PolicyScope::Global
-                    && pb.scope == PolicyScope::Agent
-                {
-                    "Agent-scope policy takes precedence over global"
-                } else {
-                    "Stricter policy (deny > require_approval > audit > allow) should win"
-                };
+                let resolution =
+                    if pa.scope == PolicyScope::Agent && pb.scope == PolicyScope::Global {
+                        "Agent-scope policy takes precedence over global"
+                    } else if pa.scope == PolicyScope::Global && pb.scope == PolicyScope::Agent {
+                        "Agent-scope policy takes precedence over global"
+                    } else {
+                        "Stricter policy (deny > require_approval > audit > allow) should win"
+                    };
 
                 conflicts.push(json!({
                     "policy_a": {
@@ -873,7 +860,8 @@ fn handle_risk_prophecy_forecast(
 
     let limits = engine.list_risk_limits();
     let all_violations = engine.list_violations(None);
-    let owned_violations: Vec<agentic_contract::Violation> = all_violations.into_iter().cloned().collect();
+    let owned_violations: Vec<agentic_contract::Violation> =
+        all_violations.into_iter().cloned().collect();
     let now = Utc::now();
 
     let mut projections = Vec::new();
@@ -890,7 +878,8 @@ fn handle_risk_prophecy_forecast(
         );
 
         // Compute trend
-        let trend_rate = compute_trend_rate(&owned_violations, &limit.label, forecast_window * 2, now);
+        let trend_rate =
+            compute_trend_rate(&owned_violations, &limit.label, forecast_window * 2, now);
 
         // Extrapolate
         let projected = extrapolate_usage(current_usage, trend_rate, forecast_window as f64);
@@ -962,10 +951,7 @@ fn handle_risk_prophecy_forecast(
     }))
 }
 
-fn handle_risk_prophecy_heatmap(
-    args: Value,
-    engine: &mut ContractEngine,
-) -> Result<Value, String> {
+fn handle_risk_prophecy_heatmap(args: Value, engine: &mut ContractEngine) -> Result<Value, String> {
     let window_secs = args
         .get("window_secs")
         .and_then(|v| v.as_i64())
@@ -1044,7 +1030,8 @@ fn handle_risk_prophecy_threshold_alert(
 
     let limits = engine.list_risk_limits();
     let all_violations = engine.list_violations(None);
-    let owned_violations: Vec<agentic_contract::Violation> = all_violations.into_iter().cloned().collect();
+    let owned_violations: Vec<agentic_contract::Violation> =
+        all_violations.into_iter().cloned().collect();
     let now = Utc::now();
 
     let mut alerts = Vec::new();
@@ -1113,7 +1100,8 @@ fn handle_risk_prophecy_correlation(
 
     let limits = engine.list_risk_limits();
     let all_violations = engine.list_violations(None);
-    let owned_violations: Vec<agentic_contract::Violation> = all_violations.into_iter().cloned().collect();
+    let owned_violations: Vec<agentic_contract::Violation> =
+        all_violations.into_iter().cloned().collect();
     let now = Utc::now();
 
     let mut correlations = Vec::new();
@@ -1344,7 +1332,12 @@ fn handle_approval_telepathy_timing(
             continue;
         }
 
-        let hour = req.created_at.format("%H").to_string().parse::<usize>().unwrap_or(0);
+        let hour = req
+            .created_at
+            .format("%H")
+            .to_string()
+            .parse::<usize>()
+            .unwrap_or(0);
         if hour < 24 {
             hour_buckets[hour].0 += 1;
             if req.status == agentic_contract::ApprovalStatus::Approved {
@@ -1513,27 +1506,18 @@ fn handle_obligation_clairvoyance_forecast(
     let relevant: Vec<&agentic_contract::Obligation> = obligations
         .into_iter()
         .filter(|o| {
-            if !include_completed
-                && o.status == agentic_contract::ObligationStatus::Fulfilled
-            {
+            if !include_completed && o.status == agentic_contract::ObligationStatus::Fulfilled {
                 return false;
             }
             // Check if obligation mentions the agent
-            word_overlap(&o.label, agent_id) > 0.1
-                || o.label.contains(agent_id)
-                || true // Include all for broad forecast
+            word_overlap(&o.label, agent_id) > 0.1 || o.label.contains(agent_id) || true
+            // Include all for broad forecast
         })
-        .filter(|o| {
-            o.deadline
-                .map(|d| d <= deadline_cutoff)
-                .unwrap_or(true)
-        })
+        .filter(|o| o.deadline.map(|d| d <= deadline_cutoff).unwrap_or(true))
         .collect();
 
     for obligation in &relevant {
-        let time_remaining = obligation
-            .deadline
-            .map(|d| (d - now).num_seconds());
+        let time_remaining = obligation.deadline.map(|d| (d - now).num_seconds());
         let effort = estimate_effort(&obligation.label);
         let miss_risk = compute_miss_risk(time_remaining, effort, 0.6, 0.4);
 
@@ -1687,15 +1671,12 @@ fn handle_obligation_clairvoyance_workload(
             .to_string();
 
         let effort = estimate_effort(&obligation.label);
-        agent_workloads
-            .entry(agent)
-            .or_default()
-            .push(json!({
-                "obligation_id": obligation.id.to_string(),
-                "label": obligation.label,
-                "effort_minutes": effort,
-                "deadline": obligation.deadline.map(|d| d.to_rfc3339()),
-            }));
+        agent_workloads.entry(agent).or_default().push(json!({
+            "obligation_id": obligation.id.to_string(),
+            "label": obligation.label,
+            "effort_minutes": effort,
+            "deadline": obligation.deadline.map(|d| d.to_rfc3339()),
+        }));
     }
 
     let mut workload_summary: Vec<Value> = agent_workloads
@@ -1765,9 +1746,7 @@ fn handle_obligation_clairvoyance_risk(
             continue;
         }
 
-        let time_remaining = obligation
-            .deadline
-            .map(|d| (d - now).num_seconds());
+        let time_remaining = obligation.deadline.map(|d| (d - now).num_seconds());
         let effort = estimate_effort(&obligation.label);
         let risk = compute_miss_risk(time_remaining, effort, urgency_weight, complexity_weight);
 
@@ -1831,10 +1810,12 @@ fn handle_violation_precognition_analyze(
     let _agent_id = args.get("agent_id").and_then(|v| v.as_str());
 
     let policies_refs = engine.list_policies(None);
-    let owned_policies: Vec<agentic_contract::Policy> = policies_refs.into_iter().cloned().collect();
+    let owned_policies: Vec<agentic_contract::Policy> =
+        policies_refs.into_iter().cloned().collect();
     let limits = engine.list_risk_limits();
     let violations_refs = engine.list_violations(None);
-    let owned_violations: Vec<agentic_contract::Violation> = violations_refs.into_iter().cloned().collect();
+    let owned_violations: Vec<agentic_contract::Violation> =
+        violations_refs.into_iter().cloned().collect();
     let now = Utc::now();
 
     let mut at_risk_policies = Vec::new();
@@ -1952,7 +1933,8 @@ fn handle_violation_precognition_batch(
     let policies_refs = engine.list_policies(None);
     let limits = engine.list_risk_limits();
     let violations_refs = engine.list_violations(None);
-    let owned_violations: Vec<agentic_contract::Violation> = violations_refs.into_iter().cloned().collect();
+    let owned_violations: Vec<agentic_contract::Violation> =
+        violations_refs.into_iter().cloned().collect();
     let now = Utc::now();
 
     let mut results = Vec::new();
@@ -1988,7 +1970,9 @@ fn handle_violation_precognition_batch(
             if overlap > 0.1 {
                 let additional = 0.1 + overlap * 0.2;
                 let projected = base_usage + cumulative + additional;
-                *cumulative_limit_usage.entry(limit.label.clone()).or_insert(0.0) += additional;
+                *cumulative_limit_usage
+                    .entry(limit.label.clone())
+                    .or_insert(0.0) += additional;
 
                 if projected > 1.0 {
                     action_issues.push(format!(
@@ -2047,7 +2031,8 @@ fn handle_violation_precognition_alternatives(
         .unwrap_or(3) as usize;
 
     let policies_refs = engine.list_policies(None);
-    let owned_policies: Vec<agentic_contract::Policy> = policies_refs.into_iter().cloned().collect();
+    let owned_policies: Vec<agentic_contract::Policy> =
+        policies_refs.into_iter().cloned().collect();
     let alternatives = generate_alternatives(&owned_policies, planned_action, max_alternatives);
 
     // Score each alternative
@@ -2176,11 +2161,9 @@ fn handle_violation_precognition_history_pattern(
             // Trend: is the pattern accelerating or decelerating?
             let trend = if intervals.len() >= 2 {
                 let mid = intervals.len() / 2;
-                let first_avg: f64 =
-                    intervals[..mid].iter().sum::<i64>() as f64 / mid as f64;
+                let first_avg: f64 = intervals[..mid].iter().sum::<i64>() as f64 / mid as f64;
                 let second_avg: f64 =
-                    intervals[mid..].iter().sum::<i64>() as f64
-                        / (intervals.len() - mid) as f64;
+                    intervals[mid..].iter().sum::<i64>() as f64 / (intervals.len() - mid) as f64;
                 if second_avg < first_avg * 0.8 {
                     "accelerating"
                 } else if second_avg > first_avg * 1.2 {
@@ -2264,7 +2247,10 @@ mod tests {
     fn test_classify_action() {
         assert_eq!(classify_action(&PolicyAction::Allow), "allowed");
         assert_eq!(classify_action(&PolicyAction::Deny), "denied");
-        assert_eq!(classify_action(&PolicyAction::RequireApproval), "conditional");
+        assert_eq!(
+            classify_action(&PolicyAction::RequireApproval),
+            "conditional"
+        );
         assert_eq!(classify_action(&PolicyAction::AuditOnly), "allowed");
     }
 
@@ -2345,11 +2331,7 @@ mod tests {
             PolicyAction::Deny,
         ));
 
-        let result = try_handle(
-            "policy_omniscience_coverage",
-            json!({}),
-            &mut engine,
-        );
+        let result = try_handle("policy_omniscience_coverage", json!({}), &mut engine);
         assert!(result.is_some());
         let value = result.unwrap().unwrap();
         assert!(value["total_active_policies"].as_u64().unwrap() >= 1);
@@ -2371,11 +2353,7 @@ mod tests {
             PolicyAction::Deny,
         ));
 
-        let result = try_handle(
-            "policy_omniscience_conflicts",
-            json!({}),
-            &mut engine,
-        );
+        let result = try_handle("policy_omniscience_conflicts", json!({}), &mut engine);
         assert!(result.is_some());
         let value = result.unwrap().unwrap();
         // Labels share no words so overlap is 0, below 0.2 threshold
@@ -2385,7 +2363,11 @@ mod tests {
     #[test]
     fn test_risk_prophecy_forecast_no_violations() {
         let mut engine = ContractEngine::new();
-        engine.add_risk_limit(agentic_contract::RiskLimit::new("api calls", agentic_contract::LimitType::Rate, 100.0));
+        engine.add_risk_limit(agentic_contract::RiskLimit::new(
+            "api calls",
+            agentic_contract::LimitType::Rate,
+            100.0,
+        ));
 
         let result = try_handle(
             "risk_prophecy_forecast",
@@ -2400,7 +2382,11 @@ mod tests {
     #[test]
     fn test_risk_prophecy_heatmap() {
         let mut engine = ContractEngine::new();
-        engine.add_risk_limit(agentic_contract::RiskLimit::new("budget", agentic_contract::LimitType::Budget, 1000.0));
+        engine.add_risk_limit(agentic_contract::RiskLimit::new(
+            "budget",
+            agentic_contract::LimitType::Budget,
+            1000.0,
+        ));
 
         let result = try_handle(
             "risk_prophecy_heatmap",
@@ -2415,7 +2401,11 @@ mod tests {
     #[test]
     fn test_risk_prophecy_threshold_alert_clean() {
         let mut engine = ContractEngine::new();
-        engine.add_risk_limit(agentic_contract::RiskLimit::new("budget", agentic_contract::LimitType::Budget, 1000.0));
+        engine.add_risk_limit(agentic_contract::RiskLimit::new(
+            "budget",
+            agentic_contract::LimitType::Budget,
+            1000.0,
+        ));
 
         let result = try_handle(
             "risk_prophecy_threshold_alert",
