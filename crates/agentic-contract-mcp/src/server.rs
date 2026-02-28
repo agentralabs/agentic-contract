@@ -113,6 +113,179 @@ fn parse_bool(v: &str) -> bool {
     )
 }
 
+fn mcp_tool_surface_is_compact() -> bool {
+    env_with_fallback("ACON_MCP_TOOL_SURFACE", "MCP_TOOL_SURFACE")
+        .map(|v| v.eq_ignore_ascii_case("compact"))
+        .unwrap_or(false)
+}
+
+fn compact_input_schema(ops: &[String], description: &str) -> Value {
+    json!({
+        "type": "object",
+        "required": ["operation"],
+        "properties": {
+            "operation": {
+                "type": "string",
+                "enum": ops,
+                "description": description
+            },
+            "params": {
+                "type": "object",
+                "description": "Arguments for the selected operation"
+            }
+        }
+    })
+}
+
+fn ops_from_defs(defs: &[tools::ToolDefinition]) -> Vec<String> {
+    defs.iter().map(|d| d.name.to_string()).collect()
+}
+
+fn core_ops_filtered<F>(filter: F) -> Vec<String>
+where
+    F: Fn(&str) -> bool,
+{
+    tools::TOOLS
+        .iter()
+        .filter_map(|t| {
+            if filter(t.name) {
+                Some(t.name.to_string())
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+fn ops_for_group(group: &str) -> Option<Vec<String>> {
+    match group {
+        "contract_main" => Some(core_ops_filtered(|name| {
+            name.starts_with("contract_")
+                && !name.starts_with("contract_workspace_")
+                && name != "contract_session_resume"
+        })),
+        "contract_policy" => Some(core_ops_filtered(|name| name.starts_with("policy_"))),
+        "contract_risk" => Some(core_ops_filtered(|name| name.starts_with("risk_limit_"))),
+        "contract_approval" => Some(core_ops_filtered(|name| name.starts_with("approval_"))),
+        "contract_enforcement" => Some(core_ops_filtered(|name| {
+            name.starts_with("condition_")
+                || name.starts_with("obligation_")
+                || name.starts_with("violation_")
+        })),
+        "contract_workspace" => Some(core_ops_filtered(|name| {
+            name.starts_with("contract_workspace_")
+                || name == "session_start"
+                || name == "session_end"
+                || name == "contract_session_resume"
+        })),
+        "contract_visibility" => Some(ops_from_defs(invention_visibility::TOOL_DEFS)),
+        "contract_generation" => Some(ops_from_defs(invention_generation::TOOL_DEFS)),
+        "contract_governance" => Some(ops_from_defs(invention_governance::TOOL_DEFS)),
+        "contract_resilience" => Some(ops_from_defs(invention_resilience::TOOL_DEFS)),
+        _ => None,
+    }
+}
+
+fn compact_tool_list() -> Vec<Value> {
+    vec![
+        json!({
+            "name": "contract_main",
+            "description": "Compact contract core facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_main").unwrap_or_default(), "Contract core operation")
+        }),
+        json!({
+            "name": "contract_policy",
+            "description": "Compact policy facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_policy").unwrap_or_default(), "Policy operation")
+        }),
+        json!({
+            "name": "contract_risk",
+            "description": "Compact risk-limit facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_risk").unwrap_or_default(), "Risk-limit operation")
+        }),
+        json!({
+            "name": "contract_approval",
+            "description": "Compact approval facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_approval").unwrap_or_default(), "Approval operation")
+        }),
+        json!({
+            "name": "contract_enforcement",
+            "description": "Compact condition/obligation/violation facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_enforcement").unwrap_or_default(), "Enforcement operation")
+        }),
+        json!({
+            "name": "contract_workspace",
+            "description": "Compact workspace/session facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_workspace").unwrap_or_default(), "Workspace/session operation")
+        }),
+        json!({
+            "name": "contract_visibility",
+            "description": "Compact visibility inventions facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_visibility").unwrap_or_default(), "Visibility invention operation")
+        }),
+        json!({
+            "name": "contract_generation",
+            "description": "Compact generation inventions facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_generation").unwrap_or_default(), "Generation invention operation")
+        }),
+        json!({
+            "name": "contract_governance",
+            "description": "Compact governance inventions facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_governance").unwrap_or_default(), "Governance invention operation")
+        }),
+        json!({
+            "name": "contract_resilience",
+            "description": "Compact resilience inventions facade",
+            "inputSchema": compact_input_schema(&ops_for_group("contract_resilience").unwrap_or_default(), "Resilience invention operation")
+        }),
+    ]
+}
+
+fn decode_compact_operation(args: Value) -> Result<(String, Value), String> {
+    let obj = args
+        .as_object()
+        .ok_or_else(|| "arguments must be an object".to_string())?;
+    let operation = obj
+        .get("operation")
+        .and_then(Value::as_str)
+        .ok_or_else(|| "'operation' is required".to_string())?
+        .to_string();
+
+    if let Some(params) = obj.get("params") {
+        return Ok((operation, params.clone()));
+    }
+
+    let mut passthrough = obj.clone();
+    passthrough.remove("operation");
+    Ok((operation, Value::Object(passthrough)))
+}
+
+fn normalize_compact_tool_call(tool_name: &str, args: Value) -> Result<(String, Value), String> {
+    if !matches!(
+        tool_name,
+        "contract_main"
+            | "contract_policy"
+            | "contract_risk"
+            | "contract_approval"
+            | "contract_enforcement"
+            | "contract_workspace"
+            | "contract_visibility"
+            | "contract_generation"
+            | "contract_governance"
+            | "contract_resilience"
+    ) {
+        return Ok((tool_name.to_string(), args));
+    }
+
+    let (operation, params) = decode_compact_operation(args)?;
+    let ops = ops_for_group(tool_name).unwrap_or_default();
+    if ops.iter().any(|op| op == &operation) {
+        Ok((operation, params))
+    } else {
+        Err(format!("Unknown {tool_name} operation: {operation}"))
+    }
+}
+
 /// Check AGENTIC_TOKEN for server-mode authentication.
 fn check_server_auth() -> Result<(), Box<dyn std::error::Error>> {
     let is_server_mode = std::env::var("AGENTRA_RUNTIME_MODE")
@@ -234,25 +407,29 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
             }
             "notifications/initialized" => continue, // No response needed
             "tools/list" => {
-                // Concatenate core tools with all invention module tools
-                let all_tools: Vec<&tools::ToolDefinition> = tools::TOOLS
-                    .iter()
-                    .chain(invention_visibility::TOOL_DEFS.iter())
-                    .chain(invention_generation::TOOL_DEFS.iter())
-                    .chain(invention_governance::TOOL_DEFS.iter())
-                    .chain(invention_resilience::TOOL_DEFS.iter())
-                    .collect();
+                let tool_list: Vec<Value> = if mcp_tool_surface_is_compact() {
+                    compact_tool_list()
+                } else {
+                    // Concatenate core tools with all invention module tools
+                    let all_tools: Vec<&tools::ToolDefinition> = tools::TOOLS
+                        .iter()
+                        .chain(invention_visibility::TOOL_DEFS.iter())
+                        .chain(invention_generation::TOOL_DEFS.iter())
+                        .chain(invention_governance::TOOL_DEFS.iter())
+                        .chain(invention_resilience::TOOL_DEFS.iter())
+                        .collect();
 
-                let tool_list: Vec<Value> = all_tools
-                    .iter()
-                    .map(|t| {
-                        json!({
-                            "name": t.name,
-                            "description": t.description,
-                            "inputSchema": serde_json::from_str::<Value>(t.input_schema).unwrap_or(json!({}))
+                    all_tools
+                        .iter()
+                        .map(|t| {
+                            json!({
+                                "name": t.name,
+                                "description": t.description,
+                                "inputSchema": serde_json::from_str::<Value>(t.input_schema).unwrap_or(json!({}))
+                            })
                         })
-                    })
-                    .collect();
+                        .collect()
+                };
 
                 json!({
                     "jsonrpc": "2.0",
@@ -262,8 +439,27 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
             }
             "tools/call" => {
                 let params = request.get("params").cloned().unwrap_or(json!({}));
-                let tool_name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
-                let args = params.get("arguments").cloned().unwrap_or(json!({}));
+                let requested_tool_name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
+                let raw_args = params.get("arguments").cloned().unwrap_or(json!({}));
+                let (tool_name, args) =
+                    match normalize_compact_tool_call(requested_tool_name, raw_args) {
+                        Ok(mapped) => mapped,
+                        Err(e) => {
+                            let response = json!({
+                                "jsonrpc": "2.0",
+                                "id": id,
+                                "result": {
+                                    "content": [{
+                                        "type": "text",
+                                        "text": format!("Error: {}", e)
+                                    }],
+                                    "isError": true
+                                }
+                            });
+                            transport.write_message(&response.to_string())?;
+                            continue;
+                        }
+                    };
 
                 // Check if tool exists in core tools or any invention module
                 let tool_exists = tools::TOOLS.iter().any(|t| t.name == tool_name)
@@ -292,24 +488,24 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
                 } else {
                     // Try invention modules first, then fall back to core tools
                     let result =
-                        invention_visibility::try_handle(tool_name, args.clone(), &mut engine)
+                        invention_visibility::try_handle(&tool_name, args.clone(), &mut engine)
                             .or_else(|| {
                                 invention_generation::try_handle(
-                                    tool_name,
+                                    &tool_name,
                                     args.clone(),
                                     &mut engine,
                                 )
                             })
                             .or_else(|| {
                                 invention_governance::try_handle(
-                                    tool_name,
+                                    &tool_name,
                                     args.clone(),
                                     &mut engine,
                                 )
                             })
                             .or_else(|| {
                                 invention_resilience::try_handle(
-                                    tool_name,
+                                    &tool_name,
                                     args.clone(),
                                     &mut engine,
                                 )
@@ -317,7 +513,7 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
 
                     let tool_result = match result {
                         Some(r) => r,
-                        None => tools::handle_tool_call(tool_name, args, &mut engine).await,
+                        None => tools::handle_tool_call(&tool_name, args, &mut engine).await,
                     };
 
                     match tool_result {
@@ -443,4 +639,72 @@ fn dirs_home() -> PathBuf {
     std::env::var("HOME")
         .map(PathBuf::from)
         .unwrap_or_else(|_| PathBuf::from("."))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn compact_tool_list_has_expected_surface() {
+        let defs = compact_tool_list();
+        let names: Vec<&str> = defs
+            .iter()
+            .filter_map(|d| d.get("name").and_then(|n| n.as_str()))
+            .collect();
+        assert_eq!(defs.len(), 10);
+        assert!(names.contains(&"contract_main"));
+        assert!(names.contains(&"contract_policy"));
+        assert!(names.contains(&"contract_risk"));
+        assert!(names.contains(&"contract_approval"));
+        assert!(names.contains(&"contract_enforcement"));
+        assert!(names.contains(&"contract_workspace"));
+        assert!(names.contains(&"contract_visibility"));
+        assert!(names.contains(&"contract_generation"));
+        assert!(names.contains(&"contract_governance"));
+        assert!(names.contains(&"contract_resilience"));
+    }
+
+    #[test]
+    fn compact_main_operation_routes_to_legacy_name() {
+        let (name, args) = normalize_compact_tool_call(
+            "contract_main",
+            json!({
+                "operation": "contract_create",
+                "params": {
+                    "label": "Ops Agreement"
+                }
+            }),
+        )
+        .expect("compact main should route");
+        assert_eq!(name, "contract_create");
+        assert_eq!(args["label"], "Ops Agreement");
+    }
+
+    #[test]
+    fn compact_workspace_operation_routes_to_legacy_name() {
+        let (name, args) = normalize_compact_tool_call(
+            "contract_workspace",
+            json!({
+                "operation": "contract_session_resume",
+                "params": { "limit": 2 }
+            }),
+        )
+        .expect("compact workspace should route");
+        assert_eq!(name, "contract_session_resume");
+        assert_eq!(args["limit"], 2);
+    }
+
+    #[test]
+    fn compact_unknown_operation_errors() {
+        let err = normalize_compact_tool_call(
+            "contract_policy",
+            json!({
+                "operation": "does_not_exist"
+            }),
+        )
+        .expect_err("unknown operation should fail");
+        assert!(err.contains("Unknown contract_policy operation"));
+    }
 }

@@ -64,6 +64,31 @@ status: stable
 | `federated_governance_create` | Create cross-organizational federated governance |
 | `self_healing_contract_create` | Create a contract that automatically adapts to violations |
 
+### Compact Facade Tools (v0.3+)
+
+Use these to keep MCP tool surfaces small while preserving backward compatibility:
+
+| Tool | Description |
+|------|-------------|
+| `contract_main` | Unified core contract operations via `operation` |
+| `contract_policy` | Unified policy operations via `operation` |
+| `contract_risk` | Unified risk-limit operations via `operation` |
+| `contract_approval` | Unified approval operations via `operation` |
+| `contract_enforcement` | Unified condition/obligation/violation operations via `operation` |
+| `contract_workspace` | Unified workspace/session operations via `operation` |
+| `contract_visibility` | Unified visibility invention operations via `operation` |
+| `contract_generation` | Unified generation invention operations via `operation` |
+| `contract_governance` | Unified governance invention operations via `operation` |
+| `contract_resilience` | Unified resilience invention operations via `operation` |
+
+Compact list mode:
+
+```bash
+export ACON_MCP_TOOL_SURFACE=compact
+```
+
+In compact mode, `tools/list` returns only the 10 facade tools above, while all legacy tool names remain callable.
+
 ## CLI Commands
 
 | Command | Description |
