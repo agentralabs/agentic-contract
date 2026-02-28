@@ -4,8 +4,8 @@
 //! framing edge cases, JSON-RPC error handling, large message handling,
 //! rapid sequential messages, and binary data rejection.
 
-use std::io::Cursor;
 use serde_json::{json, Value};
+use std::io::Cursor;
 
 // =========================================================================
 // Helpers
@@ -36,7 +36,10 @@ fn test_server_mode_requires_token() {
         std::env::var("AGENTIC_TOKEN").is_ok() || std::env::var("AGENTIC_TOKEN_FILE").is_ok();
 
     // In test env, we're NOT in server mode, so this should pass
-    assert!(!is_server || has_token, "Server mode without token should fail");
+    assert!(
+        !is_server || has_token,
+        "Server mode without token should fail"
+    );
 }
 
 // =========================================================================
@@ -220,7 +223,7 @@ fn test_jsonrpc_invalid_versions() {
         json!({"jsonrpc": "2.1"}),
         json!({"jsonrpc": ""}),
         json!({"jsonrpc": null}),
-        json!({"jsonrpc": 2.0}),  // number, not string
+        json!({"jsonrpc": 2.0}), // number, not string
         json!({"jsonrpc": true}),
         json!({"jsonrpc": []}),
         json!({"jsonrpc": {}}),
@@ -316,10 +319,8 @@ fn test_write_read_roundtrip() {
 
     // Read back
     let mut discard = Vec::new();
-    let mut transport = agentic_contract_mcp::stdio::StdioTransport::new(
-        Cursor::new(output),
-        &mut discard,
-    );
+    let mut transport =
+        agentic_contract_mcp::stdio::StdioTransport::new(Cursor::new(output), &mut discard);
     for expected in &messages {
         let read = transport.read_message().unwrap();
         assert_eq!(&read, expected);
@@ -342,11 +343,7 @@ fn test_all_prompts_expand() {
             }
         }
         let result = agentic_contract_mcp::prompts::expand_prompt(prompt.name, &args);
-        assert!(
-            result.is_some(),
-            "Prompt '{}' should expand",
-            prompt.name
-        );
+        assert!(result.is_some(), "Prompt '{}' should expand", prompt.name);
     }
 }
 
@@ -409,12 +406,9 @@ fn test_resources_no_duplicate_uris() {
 #[tokio::test]
 async fn test_tool_error_is_string() {
     let mut engine = agentic_contract::ContractEngine::new();
-    let result = agentic_contract_mcp::tools::handle_tool_call(
-        "nonexistent_tool",
-        json!({}),
-        &mut engine,
-    )
-    .await;
+    let result =
+        agentic_contract_mcp::tools::handle_tool_call("nonexistent_tool", json!({}), &mut engine)
+            .await;
     assert!(result.is_err());
     let err = result.unwrap_err();
     // Error should be a displayable string
@@ -424,12 +418,9 @@ async fn test_tool_error_is_string() {
 #[tokio::test]
 async fn test_tool_success_returns_json() {
     let mut engine = agentic_contract::ContractEngine::new();
-    let result = agentic_contract_mcp::tools::handle_tool_call(
-        "contract_stats",
-        json!({}),
-        &mut engine,
-    )
-    .await;
+    let result =
+        agentic_contract_mcp::tools::handle_tool_call("contract_stats", json!({}), &mut engine)
+            .await;
     assert!(result.is_ok());
     let val = result.unwrap();
     // Should be a JSON object

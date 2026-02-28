@@ -122,7 +122,14 @@ fn test_cli_policy_add() {
     let (_dir, path) = temp_acon_path();
     let output = Command::new(acon_bin())
         .args([
-            "--path", &path, "policy", "add", "No Friday deploys", "--scope", "global", "--action",
+            "--path",
+            &path,
+            "policy",
+            "add",
+            "No Friday deploys",
+            "--scope",
+            "global",
+            "--action",
             "deny",
         ])
         .output()
@@ -173,7 +180,13 @@ fn test_cli_policy_add_then_list() {
     // Add a policy
     Command::new(acon_bin())
         .args([
-            "--path", &path, "policy", "add", "Block writes", "--action", "deny",
+            "--path",
+            &path,
+            "policy",
+            "add",
+            "Block writes",
+            "--action",
+            "deny",
         ])
         .output()
         .unwrap();
@@ -226,11 +239,7 @@ fn test_cli_policy_add_all_scopes() {
             ])
             .output()
             .expect("Failed to run acon policy add");
-        assert!(
-            output.status.success(),
-            "Failed for scope: {}",
-            scope
-        );
+        assert!(output.status.success(), "Failed for scope: {}", scope);
     }
 }
 
@@ -250,11 +259,7 @@ fn test_cli_policy_add_all_actions() {
             ])
             .output()
             .expect("Failed to run acon policy add");
-        assert!(
-            output.status.success(),
-            "Failed for action: {}",
-            action
-        );
+        assert!(output.status.success(), "Failed for action: {}", action);
     }
 }
 
@@ -451,7 +456,14 @@ fn test_cli_violation_list_by_severity() {
     // Add violations
     Command::new(acon_bin())
         .args([
-            "--path", &path, "violation", "report", "info thing", "--severity", "info", "--actor",
+            "--path",
+            &path,
+            "violation",
+            "report",
+            "info thing",
+            "--severity",
+            "info",
+            "--actor",
             "a1",
         ])
         .output()
@@ -490,7 +502,14 @@ fn test_cli_violation_bad_severity() {
     let (_dir, path) = temp_acon_path();
     let output = Command::new(acon_bin())
         .args([
-            "--path", &path, "violation", "report", "test", "--severity", "invalid", "--actor",
+            "--path",
+            &path,
+            "violation",
+            "report",
+            "test",
+            "--severity",
+            "invalid",
+            "--actor",
             "a1",
         ])
         .output()
@@ -689,7 +708,13 @@ fn test_cli_full_workflow() {
     // 1. Add policies
     let output = Command::new(acon_bin())
         .args([
-            "--path", &path, "policy", "add", "Block deploys", "--action", "deny",
+            "--path",
+            &path,
+            "policy",
+            "add",
+            "Block deploys",
+            "--action",
+            "deny",
         ])
         .output()
         .unwrap();

@@ -541,7 +541,10 @@ impl ContractEngine {
         }
 
         if !at_risk_policies.is_empty() {
-            safe_alternatives.push(format!("Modify '{}' to avoid policy conflicts", planned_action));
+            safe_alternatives.push(format!(
+                "Modify '{}' to avoid policy conflicts",
+                planned_action
+            ));
             safe_alternatives.push("Request pre-approval before proceeding".to_string());
         }
 
@@ -552,11 +555,7 @@ impl ContractEngine {
                 .iter()
                 .map(|p| p.probability)
                 .fold(0.0f64, f64::max);
-            let max_limit = if at_risk_limits.is_empty() {
-                0.0
-            } else {
-                0.7
-            };
+            let max_limit = if at_risk_limits.is_empty() { 0.0 } else { 0.7 };
             max_policy.max(max_limit)
         };
 
@@ -902,10 +901,7 @@ impl ContractEngine {
             .file
             .violations
             .iter()
-            .filter(|v| {
-                v.actor == agent_id
-                    && (now - v.detected_at).num_seconds() <= window_secs
-            })
+            .filter(|v| v.actor == agent_id && (now - v.detected_at).num_seconds() <= window_secs)
             .collect();
 
         // Cluster by severity
@@ -1027,7 +1023,8 @@ impl ContractEngine {
             .count() as f64
             / self.file.risk_limits.len().max(1) as f64;
 
-        let health = (approval_rate * 0.4 + (1.0 - risk_breach_rate) * 0.3
+        let health = (approval_rate * 0.4
+            + (1.0 - risk_breach_rate) * 0.3
             + if deadlocks.is_empty() { 0.3 } else { 0.0 })
         .min(1.0);
 

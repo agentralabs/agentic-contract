@@ -73,11 +73,7 @@ smoke_test_ok!(
     "contract_create",
     json!({"label": "Test Contract"})
 );
-smoke_test_ok!(
-    smoke_contract_list,
-    "contract_list",
-    json!({})
-);
+smoke_test_ok!(smoke_contract_list, "contract_list", json!({}));
 smoke_test_ok!(
     smoke_policy_add,
     "policy_add",
@@ -88,11 +84,7 @@ smoke_test_ok!(
     "policy_check",
     json!({"action_type": "deploy"})
 );
-smoke_test_ok!(
-    smoke_policy_list,
-    "policy_list",
-    json!({})
-);
+smoke_test_ok!(smoke_policy_list, "policy_list", json!({}));
 smoke_test_ok!(
     smoke_risk_limit_set,
     "risk_limit_set",
@@ -103,16 +95,8 @@ smoke_test_ok!(
     "risk_limit_check",
     json!({"label": "api", "amount": 10})
 );
-smoke_test_ok!(
-    smoke_risk_limit_list,
-    "risk_limit_list",
-    json!({})
-);
-smoke_test_ok!(
-    smoke_approval_list,
-    "approval_list",
-    json!({})
-);
+smoke_test_ok!(smoke_risk_limit_list, "risk_limit_list", json!({}));
+smoke_test_ok!(smoke_approval_list, "approval_list", json!({}));
 smoke_test_ok!(
     smoke_condition_add,
     "condition_add",
@@ -123,16 +107,8 @@ smoke_test_ok!(
     "obligation_add",
     json!({"label": "weekly report", "deadline": future_dt()})
 );
-smoke_test_ok!(
-    smoke_obligation_check,
-    "obligation_check",
-    json!({})
-);
-smoke_test_ok!(
-    smoke_violation_list,
-    "violation_list",
-    json!({})
-);
+smoke_test_ok!(smoke_obligation_check, "obligation_check", json!({}));
+smoke_test_ok!(smoke_violation_list, "violation_list", json!({}));
 smoke_test_ok!(
     smoke_violation_report,
     "violation_report",
@@ -143,11 +119,7 @@ smoke_test_ok!(
     "contract_context_log",
     json!({"intent": "testing"})
 );
-smoke_test_ok!(
-    smoke_contract_stats,
-    "contract_stats",
-    json!({})
-);
+smoke_test_ok!(smoke_contract_stats, "contract_stats", json!({}));
 
 // ── 16 Invention tools ─────────────────────────────────────────────────
 
@@ -301,11 +273,7 @@ async fn smoke_self_healing_contract_create() {
 
 // ── Error path smoke tests ─────────────────────────────────────────────
 
-smoke_test_err!(
-    smoke_unknown_tool,
-    "totally_fake_tool",
-    json!({})
-);
+smoke_test_err!(smoke_unknown_tool, "totally_fake_tool", json!({}));
 smoke_test_err!(
     smoke_contract_sign_bad_id,
     "contract_sign",
@@ -452,8 +420,10 @@ fn test_transport_write_framing() {
 fn test_transport_missing_content_length() {
     let bad_input = b"No-Header: here\r\n\r\n{}";
     let mut output = Vec::new();
-    let mut transport =
-        agentic_contract_mcp::stdio::StdioTransport::new(Cursor::new(bad_input.to_vec()), &mut output);
+    let mut transport = agentic_contract_mcp::stdio::StdioTransport::new(
+        Cursor::new(bad_input.to_vec()),
+        &mut output,
+    );
     let result = transport.read_message();
     assert!(result.is_err());
 }
@@ -664,14 +634,12 @@ async fn test_concurrent_mixed_operations() {
                     )
                     .await
                 }
-                2 => {
-                    agentic_contract_mcp::tools::handle_tool_call(
-                        "violation_report",
-                        json!({"description": format!("V{}", i), "severity": "info", "agent_id": "a1"}),
-                        &mut eng,
-                    )
-                    .await
-                }
+                2 => agentic_contract_mcp::tools::handle_tool_call(
+                    "violation_report",
+                    json!({"description": format!("V{}", i), "severity": "info", "agent_id": "a1"}),
+                    &mut eng,
+                )
+                .await,
                 _ => {
                     agentic_contract_mcp::tools::handle_tool_call(
                         "obligation_add",
@@ -948,13 +916,10 @@ async fn test_stats_after_bulk_load() {
         .unwrap();
     }
 
-    let stats = agentic_contract_mcp::tools::handle_tool_call(
-        "contract_stats",
-        json!({}),
-        &mut engine,
-    )
-    .await
-    .unwrap();
+    let stats =
+        agentic_contract_mcp::tools::handle_tool_call("contract_stats", json!({}), &mut engine)
+            .await
+            .unwrap();
 
     assert!(stats["policy_count"].as_u64().unwrap() >= 20);
     assert!(stats["risk_limit_count"].as_u64().unwrap() >= 15);
@@ -1001,13 +966,10 @@ async fn test_contract_create_sign_verify_list_get() {
     assert!(verified.get("valid").is_some());
 
     // List
-    let list = agentic_contract_mcp::tools::handle_tool_call(
-        "contract_list",
-        json!({}),
-        &mut engine,
-    )
-    .await
-    .unwrap();
+    let list =
+        agentic_contract_mcp::tools::handle_tool_call("contract_list", json!({}), &mut engine)
+            .await
+            .unwrap();
     assert!(list["count"].as_u64().unwrap() >= 1);
 
     // Get

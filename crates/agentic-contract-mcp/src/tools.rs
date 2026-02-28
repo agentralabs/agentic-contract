@@ -953,7 +953,9 @@ pub async fn handle_tool_call(
         // ── 7. Policy DNA ─────────────────────────────────────────────
         "policy_dna_extract" => {
             let policy_id = require_id(&args, "policy_id")?;
-            let result = engine.extract_policy_dna(policy_id).map_err(|e| e.to_string())?;
+            let result = engine
+                .extract_policy_dna(policy_id)
+                .map_err(|e| e.to_string())?;
 
             Ok(json!({
                 "id": result.id.to_string(),
@@ -1088,10 +1090,7 @@ pub async fn handle_tool_call(
         // ── 12. Smart Escalation ─────────────────────────────────────
         "smart_escalation_route" => {
             let description = require_str(&args, "description")?;
-            let urgency = args
-                .get("urgency")
-                .and_then(|v| v.as_f64())
-                .unwrap_or(0.5);
+            let urgency = args.get("urgency").and_then(|v| v.as_f64()).unwrap_or(0.5);
 
             let result = engine.smart_escalate(description, urgency);
             Ok(json!({

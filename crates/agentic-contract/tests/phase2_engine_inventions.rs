@@ -4,8 +4,8 @@
 //! large dataset handling, file format roundtrip under load,
 //! concurrent engine access, and error recovery paths.
 
-use agentic_contract::*;
 use agentic_contract::inventions::{ArbitrationMethod, GovernanceLevel, TransparencyLevel};
+use agentic_contract::*;
 
 // =========================================================================
 // Helpers
@@ -26,11 +26,31 @@ fn populated_engine() -> ContractEngine {
     let mut engine = fresh();
 
     // Policies
-    engine.add_policy(Policy::new("deploy", PolicyScope::Global, PolicyAction::RequireApproval));
-    engine.add_policy(Policy::new("read_data", PolicyScope::Global, PolicyAction::Allow));
-    engine.add_policy(Policy::new("write_data", PolicyScope::Session, PolicyAction::Deny));
-    engine.add_policy(Policy::new("admin_action", PolicyScope::Agent, PolicyAction::RequireApproval));
-    engine.add_policy(Policy::new("logging", PolicyScope::Global, PolicyAction::AuditOnly));
+    engine.add_policy(Policy::new(
+        "deploy",
+        PolicyScope::Global,
+        PolicyAction::RequireApproval,
+    ));
+    engine.add_policy(Policy::new(
+        "read_data",
+        PolicyScope::Global,
+        PolicyAction::Allow,
+    ));
+    engine.add_policy(Policy::new(
+        "write_data",
+        PolicyScope::Session,
+        PolicyAction::Deny,
+    ));
+    engine.add_policy(Policy::new(
+        "admin_action",
+        PolicyScope::Agent,
+        PolicyAction::RequireApproval,
+    ));
+    engine.add_policy(Policy::new(
+        "logging",
+        PolicyScope::Global,
+        PolicyAction::AuditOnly,
+    ));
 
     // Risk limits
     engine.add_risk_limit(RiskLimit::new("API calls/hr", LimitType::Rate, 1000.0));
@@ -38,16 +58,43 @@ fn populated_engine() -> ContractEngine {
     engine.add_risk_limit(RiskLimit::new("Budget $", LimitType::Budget, 100.0));
 
     // Obligations
-    engine.add_obligation(Obligation::new("Weekly report", "Submit weekly compliance report", "agent_1").with_deadline(future_dt()));
-    engine.add_obligation(Obligation::new("Security scan", "Run vulnerability scan", "agent_2"));
+    engine.add_obligation(
+        Obligation::new(
+            "Weekly report",
+            "Submit weekly compliance report",
+            "agent_1",
+        )
+        .with_deadline(future_dt()),
+    );
+    engine.add_obligation(Obligation::new(
+        "Security scan",
+        "Run vulnerability scan",
+        "agent_2",
+    ));
 
     // Violations
-    engine.report_violation(Violation::new("Rate spike", ViolationSeverity::Warning, "agent_1"));
-    engine.report_violation(Violation::new("Memory overflow", ViolationSeverity::Critical, "agent_2"));
+    engine.report_violation(Violation::new(
+        "Rate spike",
+        ViolationSeverity::Warning,
+        "agent_1",
+    ));
+    engine.report_violation(Violation::new(
+        "Memory overflow",
+        ViolationSeverity::Critical,
+        "agent_2",
+    ));
 
     // Conditions
-    engine.add_condition(Condition::new("mem_check", ConditionType::Threshold, "memory < 80%"));
-    engine.add_condition(Condition::new("time_check", ConditionType::TimeBased, "weekday"));
+    engine.add_condition(Condition::new(
+        "mem_check",
+        ConditionType::Threshold,
+        "memory < 80%",
+    ));
+    engine.add_condition(Condition::new(
+        "time_check",
+        ConditionType::TimeBased,
+        "weekday",
+    ));
 
     // Approval rules
     engine.add_approval_rule(ApprovalRule::new("deploy gate", "deploy:*"));
@@ -64,7 +111,11 @@ fn test_invention_policy_omniscience() {
     let engine = populated_engine();
     let result = engine.policy_omniscience("agent_1", "deploy");
     assert!(result.total_permissions > 0);
-    assert!(!result.allowed_actions.is_empty() || !result.denied_actions.is_empty() || !result.conditional_actions.is_empty());
+    assert!(
+        !result.allowed_actions.is_empty()
+            || !result.denied_actions.is_empty()
+            || !result.conditional_actions.is_empty()
+    );
 }
 
 #[test]
@@ -204,7 +255,11 @@ fn test_invention_trust_gradient_unknown_agent() {
 fn test_invention_collective_contract() {
     let engine = populated_engine();
     let result = engine.create_collective_contract(
-        vec![("agent_1", "Engineer"), ("agent_2", "Reviewer"), ("agent_3", "Observer")],
+        vec![
+            ("agent_1", "Engineer"),
+            ("agent_2", "Reviewer"),
+            ("agent_3", "Observer"),
+        ],
         ArbitrationMethod::MajorityVote,
     );
     assert!(!result.id.to_string().is_empty());
@@ -239,7 +294,12 @@ fn test_invention_temporal_contract() {
 #[test]
 fn test_invention_temporal_contract_all_levels() {
     let engine = fresh();
-    for level in [GovernanceLevel::Conservative, GovernanceLevel::Moderate, GovernanceLevel::Permissive, GovernanceLevel::Autonomous] {
+    for level in [
+        GovernanceLevel::Conservative,
+        GovernanceLevel::Moderate,
+        GovernanceLevel::Permissive,
+        GovernanceLevel::Autonomous,
+    ] {
         let result = engine.create_temporal_contract("test", level);
         assert_eq!(result.initial_level, level);
     }
@@ -255,7 +315,9 @@ fn test_invention_contract_inheritance() {
     let policies = engine.list_policies(None);
     let parent_id = policies[0].id;
     let child_id = policies[1].id;
-    let result = engine.create_contract_inheritance(parent_id, child_id, true).unwrap();
+    let result = engine
+        .create_contract_inheritance(parent_id, child_id, true)
+        .unwrap();
     assert!(!result.id.to_string().is_empty());
     assert_eq!(result.parent_id, parent_id);
     assert_eq!(result.child_id, child_id);
@@ -343,7 +405,11 @@ fn test_invention_federated_governance() {
     let engine = populated_engine();
     let result = engine.create_federated_governance(
         "Org Alliance",
-        vec![("org_1", "Finance"), ("org_2", "Engineering"), ("org_3", "Security")],
+        vec![
+            ("org_1", "Finance"),
+            ("org_2", "Engineering"),
+            ("org_3", "Security"),
+        ],
         TransparencyLevel::Full,
     );
     assert!(!result.id.to_string().is_empty());
@@ -354,12 +420,13 @@ fn test_invention_federated_governance() {
 #[test]
 fn test_invention_federated_governance_all_transparency() {
     let engine = fresh();
-    for level in [TransparencyLevel::Full, TransparencyLevel::Summary, TransparencyLevel::Minimal] {
-        let result = engine.create_federated_governance(
-            "test",
-            vec![("a", "A"), ("b", "B")],
-            level,
-        );
+    for level in [
+        TransparencyLevel::Full,
+        TransparencyLevel::Summary,
+        TransparencyLevel::Minimal,
+    ] {
+        let result =
+            engine.create_federated_governance("test", vec![("a", "A"), ("b", "B")], level);
         assert_eq!(result.transparency, level);
     }
 }
@@ -481,9 +548,17 @@ fn test_file_roundtrip_loaded() {
 
     let mut engine = fresh();
     for i in 0..100 {
-        engine.add_policy(Policy::new(&format!("P{}", i), PolicyScope::Global, PolicyAction::Deny));
+        engine.add_policy(Policy::new(
+            &format!("P{}", i),
+            PolicyScope::Global,
+            PolicyAction::Deny,
+        ));
         engine.add_risk_limit(RiskLimit::new(&format!("L{}", i), LimitType::Rate, 100.0));
-        engine.report_violation(Violation::new(&format!("V{}", i), ViolationSeverity::Info, "a1"));
+        engine.report_violation(Violation::new(
+            &format!("V{}", i),
+            ViolationSeverity::Info,
+            "a1",
+        ));
         engine.add_obligation(Obligation::new(&format!("O{}", i), "desc", "a1"));
     }
 
@@ -503,11 +578,19 @@ fn test_file_roundtrip_preserves_data() {
     let path = dir.path().join("preserve.acon");
 
     let mut engine = fresh();
-    let policy = Policy::new("test policy", PolicyScope::Agent, PolicyAction::RequireApproval)
-        .with_description("Important policy");
+    let policy = Policy::new(
+        "test policy",
+        PolicyScope::Agent,
+        PolicyAction::RequireApproval,
+    )
+    .with_description("Important policy");
     let pid = engine.add_policy(policy);
     engine.add_risk_limit(RiskLimit::new("API limit", LimitType::Budget, 99.99));
-    engine.report_violation(Violation::new("Test violation", ViolationSeverity::Warning, "agent_x"));
+    engine.report_violation(Violation::new(
+        "Test violation",
+        ViolationSeverity::Warning,
+        "agent_x",
+    ));
 
     engine.file.path = Some(path.clone());
     engine.file.save().unwrap();
@@ -566,8 +649,16 @@ fn test_open_truncated_file() {
 #[test]
 fn test_policy_check_deny_wins() {
     let mut engine = fresh();
-    engine.add_policy(Policy::new("deploy", PolicyScope::Global, PolicyAction::Allow));
-    engine.add_policy(Policy::new("deploy", PolicyScope::Global, PolicyAction::Deny));
+    engine.add_policy(Policy::new(
+        "deploy",
+        PolicyScope::Global,
+        PolicyAction::Allow,
+    ));
+    engine.add_policy(Policy::new(
+        "deploy",
+        PolicyScope::Global,
+        PolicyAction::Deny,
+    ));
     let result = engine.check_policy("deploy", PolicyScope::Global);
     // Deny should take precedence
     assert_eq!(result, PolicyAction::Deny);
@@ -576,8 +667,16 @@ fn test_policy_check_deny_wins() {
 #[test]
 fn test_policy_check_scope_isolation() {
     let mut engine = fresh();
-    engine.add_policy(Policy::new("action", PolicyScope::Global, PolicyAction::Allow));
-    engine.add_policy(Policy::new("action", PolicyScope::Agent, PolicyAction::Deny));
+    engine.add_policy(Policy::new(
+        "action",
+        PolicyScope::Global,
+        PolicyAction::Allow,
+    ));
+    engine.add_policy(Policy::new(
+        "action",
+        PolicyScope::Agent,
+        PolicyAction::Deny,
+    ));
 
     let global_result = engine.check_policy("action", PolicyScope::Global);
     assert_eq!(global_result, PolicyAction::Allow);
@@ -589,7 +688,11 @@ fn test_policy_check_scope_isolation() {
 #[test]
 fn test_policy_check_no_match() {
     let mut engine = fresh();
-    engine.add_policy(Policy::new("deploy", PolicyScope::Global, PolicyAction::Deny));
+    engine.add_policy(Policy::new(
+        "deploy",
+        PolicyScope::Global,
+        PolicyAction::Deny,
+    ));
     let result = engine.check_policy("read_file", PolicyScope::Global);
     // No matching policy = default allow
     assert_eq!(result, PolicyAction::Allow);
@@ -627,10 +730,14 @@ fn test_approval_full_workflow() {
     let rule_id = engine.add_approval_rule(ApprovalRule::new("deploy gate", "deploy:*"));
 
     // Request approval
-    let request_id = engine.request_approval(rule_id, "Deploy v2.0", "agent_1").unwrap();
+    let request_id = engine
+        .request_approval(rule_id, "Deploy v2.0", "agent_1")
+        .unwrap();
 
     // Decide approval
-    let decision_id = engine.decide_approval(request_id, DecisionType::Approve, "admin", "LGTM").unwrap();
+    let decision_id = engine
+        .decide_approval(request_id, DecisionType::Approve, "admin", "LGTM")
+        .unwrap();
     assert!(!decision_id.to_string().is_empty());
 
     // List should show approved
@@ -642,8 +749,12 @@ fn test_approval_full_workflow() {
 fn test_approval_deny_workflow() {
     let mut engine = fresh();
     let rule_id = engine.add_approval_rule(ApprovalRule::new("gate", "action:*"));
-    let request_id = engine.request_approval(rule_id, "Do something risky", "agent_1").unwrap();
-    engine.decide_approval(request_id, DecisionType::Deny, "admin", "Too risky").unwrap();
+    let request_id = engine
+        .request_approval(rule_id, "Do something risky", "agent_1")
+        .unwrap();
+    engine
+        .decide_approval(request_id, DecisionType::Deny, "admin", "Too risky")
+        .unwrap();
 
     let denied = engine.list_approval_requests(Some(ApprovalStatus::Denied));
     assert_eq!(denied.len(), 1);
@@ -772,10 +883,8 @@ fn test_all_inventions_populated() {
     // 8. Trust Gradients
     let _ = engine.evaluate_trust_gradient("agent_1", "deploy");
     // 9. Collective Contracts
-    let _ = engine.create_collective_contract(
-        vec![("a", "A"), ("b", "B")],
-        ArbitrationMethod::Automated,
-    );
+    let _ = engine
+        .create_collective_contract(vec![("a", "A"), ("b", "B")], ArbitrationMethod::Automated);
     // 10. Temporal Contracts
     let _ = engine.create_temporal_contract("test", GovernanceLevel::Conservative);
     // 11. Contract Inheritance

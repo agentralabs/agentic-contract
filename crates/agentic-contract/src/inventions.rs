@@ -904,7 +904,10 @@ mod tests {
 
     #[test]
     fn test_arbitration_method_equality() {
-        assert_eq!(ArbitrationMethod::MajorityVote, ArbitrationMethod::MajorityVote);
+        assert_eq!(
+            ArbitrationMethod::MajorityVote,
+            ArbitrationMethod::MajorityVote
+        );
     }
 
     #[test]
