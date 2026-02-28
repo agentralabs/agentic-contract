@@ -474,7 +474,7 @@ fn test_stress_2000_policies() {
             2 => PolicyAction::RequireApproval,
             _ => PolicyAction::AuditOnly,
         };
-        engine.add_policy(Policy::new(&format!("Policy {}", i), scope, action));
+        engine.add_policy(Policy::new(format!("Policy {}", i), scope, action));
     }
     let policies = engine.list_policies(None);
     assert_eq!(policies.len(), 2000);
@@ -490,7 +490,7 @@ fn test_stress_1000_risk_limits() {
             2 => LimitType::Budget,
             _ => LimitType::Count,
         };
-        engine.add_risk_limit(RiskLimit::new(&format!("Limit {}", i), lt, (i + 1) as f64));
+        engine.add_risk_limit(RiskLimit::new(format!("Limit {}", i), lt, (i + 1) as f64));
     }
     let limits = engine.list_risk_limits();
     assert_eq!(limits.len(), 1000);
@@ -507,9 +507,9 @@ fn test_stress_2000_violations() {
             _ => ViolationSeverity::Fatal,
         };
         engine.report_violation(Violation::new(
-            &format!("Violation {}", i),
+            format!("Violation {}", i),
             sev,
-            &format!("agent_{}", i % 10),
+            format!("agent_{}", i % 10),
         ));
     }
     let all = engine.list_violations(None);
@@ -524,9 +524,9 @@ fn test_stress_500_obligations() {
     let mut engine = fresh();
     for i in 0..500 {
         let mut o = Obligation::new(
-            &format!("Obligation {}", i),
-            &format!("Description {}", i),
-            &format!("agent_{}", i % 5),
+            format!("Obligation {}", i),
+            format!("Description {}", i),
+            format!("agent_{}", i % 5),
         );
         if i % 2 == 0 {
             o = o.with_deadline(future_dt());
@@ -549,17 +549,17 @@ fn test_file_roundtrip_loaded() {
     let mut engine = fresh();
     for i in 0..100 {
         engine.add_policy(Policy::new(
-            &format!("P{}", i),
+            format!("P{}", i),
             PolicyScope::Global,
             PolicyAction::Deny,
         ));
-        engine.add_risk_limit(RiskLimit::new(&format!("L{}", i), LimitType::Rate, 100.0));
+        engine.add_risk_limit(RiskLimit::new(format!("L{}", i), LimitType::Rate, 100.0));
         engine.report_violation(Violation::new(
-            &format!("V{}", i),
+            format!("V{}", i),
             ViolationSeverity::Info,
             "a1",
         ));
-        engine.add_obligation(Obligation::new(&format!("O{}", i), "desc", "a1"));
+        engine.add_obligation(Obligation::new(format!("O{}", i), "desc", "a1"));
     }
 
     engine.file.path = Some(path.clone());
