@@ -6,7 +6,7 @@ description: Complete reference for AgenticContract MCP tools
 
 # MCP Tools Reference
 
-AgenticContract exposes 22 core tools and 16 invention tools via the Model Context Protocol.
+AgenticContract exposes 22 core tools and 16 advanced tools via the Model Context Protocol.
 
 ## Contract Tools
 

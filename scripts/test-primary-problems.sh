@@ -32,7 +32,7 @@ acon_file="$tmpdir/primary.acon"
 echo "[1/8] Create contract artifact"
 # acon creates on first use via open_or_create
 stats_out="$(run_acon --path "$acon_file" stats)"
-assert_contains "$stats_out" "policies" "create stats"
+assert_contains "$stats_out" "policy_count" "create stats"
 
 echo "[2/8] Add policies (core governance)"
 policy_out="$(run_acon --path "$acon_file" policy add --label "No unreviewed deploys" --action deny --scope global)"

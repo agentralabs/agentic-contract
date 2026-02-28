@@ -35,7 +35,7 @@ agentic-contract/
 │   │   │   ├── main.rs             # Entry point (serve/info)
 │   │   │   ├── server.rs           # JSON-RPC loop
 │   │   │   ├── stdio.rs            # Content-Length framing transport
-│   │   │   ├── tools.rs            # 22 core + 16 invention tools
+│   │   │   ├── tools.rs            # 22 core + 16 advanced tools
 │   │   │   ├── resources.rs        # 12 resources (acon:// URIs)
 │   │   │   ├── prompts.rs          # 4 prompts
 │   │   │   └── greeting.rs         # Startup banner
@@ -76,7 +76,7 @@ The core library defines all domain types and the `ContractEngine` facade. It ha
 
 JSON-RPC server communicating over stdio using Content-Length framing. Implements MCP protocol version `2024-11-05`.
 
-**Capabilities**: 22 core tools + 16 invention tools, 12 resources, 4 prompts
+**Capabilities**: 22 core tools + 16 advanced tools, 12 resources, 4 prompts
 
 **Key behaviors**:
 - Unknown method: JSON-RPC error `-32601`

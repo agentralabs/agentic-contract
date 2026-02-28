@@ -42,7 +42,7 @@ The MCP server exposes 22 core tools organized by entity type:
 | Violation | report, list | 2 |
 | Stats/Context | stats, context_log | 2 |
 
-Plus 16 invention tools for advanced use cases (see [MCP Tools Reference](mcp-tools.md)).
+Plus 16 advanced tools for advanced use cases (see [MCP Tools Reference](mcp-tools.md)).
 
 ### Common Workflow: Pre-Action Policy Check
 

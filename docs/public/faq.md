@@ -110,7 +110,7 @@ Protocol version `2024-11-05`.
 
 **How many MCP tools are available?**
 
-22 core tools covering all six entity types plus context logging and statistics. Additionally, 16 invention tools provide advanced capabilities (risk prophecy, violation precognition, contract simulation, etc.).
+22 core tools covering all six entity types plus context logging and statistics. Additionally, 16 advanced tools provide advanced capabilities (risk prophecy, violation precognition, contract simulation, etc.).
 
 **How are errors reported in MCP?**
 

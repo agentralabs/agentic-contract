@@ -81,7 +81,7 @@ acon stats                              # Full summary
 
 ---
 
-## MCP Tools (22 core + 16 inventions)
+## MCP Tools (22 core + 16 advanced capabilities)
 
 ### Core Tools
 
@@ -110,7 +110,7 @@ acon stats                              # Full summary
 | **Context** | `contract_context_log` | Log the intent and context behind a contract action |
 | **Stats** | `contract_stats` | Get summary statistics for the contract store |
 
-### Invention Tools (16)
+### Advanced Tools (16)
 
 | Tool | Description |
 |:---|:---|
@@ -434,12 +434,12 @@ The binary format uses `b"ACON"` magic bytes, fixed-size records for O(1) entity
 | Suite | Tests | |
 |:---|---:|:---|
 | Rust core engine | **33** | Unit tests for all 6 entity types + SDK trait impls |
-| Engine inventions stress | **55** | All 16 inventions + large datasets + error paths |
+| Engine advanced stress | **55** | All 16 advanced capabilities + large datasets + error paths |
 | Existing stress/edge cases | **14** | Boundary conditions, Unicode, concurrency |
 | MCP server stress | **80** | All 38 tools, protocol compliance, transport, concurrency |
 | Server stress | **30** | Prompts, resources, transport edge cases, auth |
 | CLI integration | **41** | All subcommands, bad args, persistence, workflows |
-| Edge case inventions | **29** | MCP Quality Standard compliance |
+| Edge case advanced | **29** | MCP Quality Standard compliance |
 | MCP lib unit tests | **6** | Transport and JSON-RPC validation |
 | **Total** | **288** | All passing |
 
@@ -456,8 +456,8 @@ This is a Cargo workspace monorepo containing the core library, MCP server, CLI,
 agentic-contract/
 ├── Cargo.toml                       # Workspace root
 ├── crates/
-│   ├── agentic-contract/            # Core library (policy engine, file format, inventions)
-│   ├── agentic-contract-mcp/        # MCP server (22 core + 16 invention tools)
+│   ├── agentic-contract/            # Core library (policy engine, file format, advanced capabilities)
+│   ├── agentic-contract-mcp/        # MCP server (22 core + 16 advanced tools)
 │   ├── agentic-contract-cli/        # CLI binary: acon (policy/limit/approval/obligation/violation)
 │   └── agentic-contract-ffi/        # FFI bindings (C header + shared library)
 ├── python/                          # Python SDK (PyPI: agentic-contract)

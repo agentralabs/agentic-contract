@@ -31,7 +31,7 @@ status: stable
 | `contract_context_log` | `intent`, `topic?` | Log the intent and context behind a contract action |
 | `contract_stats` | — | Get summary statistics for the contract store |
 
-### Invention Tools (16)
+### Advanced Tools (16)
 
 | Tool | Description |
 |------|-------------|
