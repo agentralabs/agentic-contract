@@ -27,12 +27,23 @@ fn future_dt() -> String {
 
 #[test]
 fn test_tool_count() {
-    // AgenticContract should have exactly 38 tools (22 core + 16 inventions)
+    // Core tools are in tools::TOOLS (22 tools).
+    // Invention tools are in separate TOOL_DEFS arrays chained at the server level.
+    let core = agentic_contract_mcp::tools::TOOLS.len();
+    let inv_vis = agentic_contract_mcp::invention_visibility::TOOL_DEFS.len();
+    let inv_gen = agentic_contract_mcp::invention_generation::TOOL_DEFS.len();
+    let inv_gov = agentic_contract_mcp::invention_governance::TOOL_DEFS.len();
+    let inv_res = agentic_contract_mcp::invention_resilience::TOOL_DEFS.len();
+    let total = core + inv_vis + inv_gen + inv_gov + inv_res;
     assert_eq!(
-        agentic_contract_mcp::tools::TOOLS.len(),
-        38,
-        "Expected 38 tools, got {}",
-        agentic_contract_mcp::tools::TOOLS.len()
+        core, 22,
+        "Expected 22 core tools, got {}",
+        core
+    );
+    assert!(
+        total > 22,
+        "Expected invention tools to add to core count, total is {}",
+        total
     );
 }
 

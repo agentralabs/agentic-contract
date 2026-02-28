@@ -1,4 +1,8 @@
 pub mod greeting;
+pub mod invention_generation;
+pub mod invention_governance;
+pub mod invention_resilience;
+pub mod invention_visibility;
 pub mod prompts;
 pub mod resources;
 pub mod server;

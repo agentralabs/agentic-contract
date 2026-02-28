@@ -31,14 +31,44 @@ fn frame_message(msg: &str) -> Vec<u8> {
 // Section 1: Macro-generated smoke tests for all 38 tools
 // =========================================================================
 
+/// Dispatch a tool call through invention modules first, then core tools (same as server.rs).
+async fn dispatch_tool(
+    tool: &str,
+    args: Value,
+    engine: &mut agentic_contract::ContractEngine,
+) -> Result<Value, String> {
+    use agentic_contract_mcp::{
+        invention_generation, invention_governance, invention_resilience, invention_visibility,
+    };
+    let result = invention_visibility::try_handle(tool, args.clone(), engine)
+        .or_else(|| invention_generation::try_handle(tool, args.clone(), engine))
+        .or_else(|| invention_governance::try_handle(tool, args.clone(), engine))
+        .or_else(|| invention_resilience::try_handle(tool, args.clone(), engine));
+
+    match result {
+        Some(r) => r,
+        None => agentic_contract_mcp::tools::handle_tool_call(tool, args, engine).await,
+    }
+}
+
+/// Collect all tool definitions (core + invention modules).
+fn all_tool_defs() -> Vec<&'static agentic_contract_mcp::tools::ToolDefinition> {
+    agentic_contract_mcp::tools::TOOLS
+        .iter()
+        .chain(agentic_contract_mcp::invention_visibility::TOOL_DEFS.iter())
+        .chain(agentic_contract_mcp::invention_generation::TOOL_DEFS.iter())
+        .chain(agentic_contract_mcp::invention_governance::TOOL_DEFS.iter())
+        .chain(agentic_contract_mcp::invention_resilience::TOOL_DEFS.iter())
+        .collect()
+}
+
 /// Macro to generate a smoke test that calls a tool with given args and asserts it returns Ok or Err.
 macro_rules! smoke_test_ok {
     ($name:ident, $tool:expr, $args:expr) => {
         #[tokio::test]
         async fn $name() {
             let mut engine = fresh_engine();
-            let result =
-                agentic_contract_mcp::tools::handle_tool_call($tool, $args, &mut engine).await;
+            let result = dispatch_tool($tool, $args, &mut engine).await;
             assert!(
                 result.is_ok(),
                 "Tool '{}' should succeed but got: {:?}",
@@ -54,8 +84,7 @@ macro_rules! smoke_test_err {
         #[tokio::test]
         async fn $name() {
             let mut engine = fresh_engine();
-            let result =
-                agentic_contract_mcp::tools::handle_tool_call($tool, $args, &mut engine).await;
+            let result = dispatch_tool($tool, $args, &mut engine).await;
             assert!(
                 result.is_err(),
                 "Tool '{}' should fail but succeeded with: {:?}",
@@ -125,27 +154,27 @@ smoke_test_ok!(smoke_contract_stats, "contract_stats", json!({}));
 
 smoke_test_ok!(
     smoke_policy_omniscience,
-    "policy_omniscience",
+    "policy_omniscience_query",
     json!({"agent_id": "agent_1"})
 );
 smoke_test_ok!(
     smoke_risk_prophecy,
-    "risk_prophecy",
+    "risk_prophecy_forecast",
     json!({"agent_id": "agent_1"})
 );
 smoke_test_ok!(
     smoke_approval_telepathy,
-    "approval_telepathy",
+    "approval_telepathy_predict",
     json!({"action": "deploy production"})
 );
 smoke_test_ok!(
     smoke_obligation_clairvoyance,
-    "obligation_clairvoyance",
+    "obligation_clairvoyance_forecast",
     json!({"agent_id": "agent_1"})
 );
 smoke_test_ok!(
     smoke_violation_precognition,
-    "violation_precognition",
+    "violation_precognition_analyze",
     json!({"planned_action": "delete production database"})
 );
 smoke_test_ok!(
@@ -202,12 +231,7 @@ async fn smoke_policy_dna_extract() {
     .await
     .expect("policy_add should succeed");
     let id = val["id"].as_str().expect("should have id field");
-    let result = agentic_contract_mcp::tools::handle_tool_call(
-        "policy_dna_extract",
-        json!({"policy_id": id}),
-        &mut engine,
-    )
-    .await;
+    let result = dispatch_tool("policy_dna_extract", json!({"policy_id": id}), &mut engine).await;
     assert!(
         result.is_ok(),
         "policy_dna_extract should succeed: {:?}",
@@ -234,7 +258,7 @@ async fn smoke_contract_inheritance_create() {
     .await
     .expect("policy_add should succeed");
     let child_id = v2["id"].as_str().expect("should have id");
-    let result = agentic_contract_mcp::tools::handle_tool_call(
+    let result = dispatch_tool(
         "contract_inheritance_create",
         json!({"parent_id": parent_id, "child_id": child_id, "propagate": true}),
         &mut engine,
@@ -258,7 +282,7 @@ async fn smoke_self_healing_contract_create() {
     .await
     .expect("contract_create should succeed");
     let base_id = val["id"].as_str().expect("should have id");
-    let result = agentic_contract_mcp::tools::handle_tool_call(
+    let result = dispatch_tool(
         "self_healing_contract_create",
         json!({"base_contract_id": base_id}),
         &mut engine,
@@ -311,12 +335,22 @@ smoke_test_err!(
 
 #[test]
 fn test_all_38_tools_present() {
-    assert_eq!(agentic_contract_mcp::tools::TOOLS.len(), 38);
+    let all = all_tool_defs();
+    assert!(
+        all.len() >= 38,
+        "Expected at least 38 combined tools (22 core + invention), got {}",
+        all.len()
+    );
+    assert_eq!(
+        agentic_contract_mcp::tools::TOOLS.len(),
+        22,
+        "Expected 22 core tools"
+    );
 }
 
 #[test]
 fn test_tool_names_are_snake_case() {
-    for tool in agentic_contract_mcp::tools::TOOLS {
+    for tool in all_tool_defs() {
         assert!(
             tool.name.chars().all(|c| c.is_lowercase() || c == '_'),
             "Tool name '{}' should be snake_case",
@@ -327,7 +361,7 @@ fn test_tool_names_are_snake_case() {
 
 #[test]
 fn test_descriptions_verb_first_no_trailing_period() {
-    for tool in agentic_contract_mcp::tools::TOOLS {
+    for tool in all_tool_defs() {
         let first = tool.description.chars().next().unwrap();
         assert!(
             first.is_uppercase(),
@@ -346,7 +380,7 @@ fn test_descriptions_verb_first_no_trailing_period() {
 
 #[test]
 fn test_all_schemas_parse_as_json() {
-    for tool in agentic_contract_mcp::tools::TOOLS {
+    for tool in all_tool_defs() {
         let parsed: Result<Value, _> = serde_json::from_str(tool.input_schema);
         assert!(
             parsed.is_ok(),
@@ -364,10 +398,7 @@ fn test_all_schemas_parse_as_json() {
 
 #[test]
 fn test_no_duplicate_tool_names() {
-    let mut names: Vec<&str> = agentic_contract_mcp::tools::TOOLS
-        .iter()
-        .map(|t| t.name)
-        .collect();
+    let mut names: Vec<&str> = all_tool_defs().iter().map(|t| t.name).collect();
     names.sort();
     let before = names.len();
     names.dedup();

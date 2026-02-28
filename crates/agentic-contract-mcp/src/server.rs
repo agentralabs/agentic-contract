@@ -5,6 +5,10 @@ use std::path::PathBuf;
 use serde_json::{json, Value};
 
 use crate::greeting;
+use crate::invention_generation;
+use crate::invention_governance;
+use crate::invention_resilience;
+use crate::invention_visibility;
 use crate::prompts;
 use crate::stdio::{validate_jsonrpc, StdioTransport, TransportError};
 use crate::tools;
@@ -123,7 +127,16 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
             }
             "notifications/initialized" => continue, // No response needed
             "tools/list" => {
-                let tool_list: Vec<Value> = tools::TOOLS
+                // Concatenate core tools with all invention module tools
+                let all_tools: Vec<&tools::ToolDefinition> = tools::TOOLS
+                    .iter()
+                    .chain(invention_visibility::TOOL_DEFS.iter())
+                    .chain(invention_generation::TOOL_DEFS.iter())
+                    .chain(invention_governance::TOOL_DEFS.iter())
+                    .chain(invention_resilience::TOOL_DEFS.iter())
+                    .collect();
+
+                let tool_list: Vec<Value> = all_tools
                     .iter()
                     .map(|t| {
                         json!({
@@ -145,8 +158,12 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
                 let tool_name = params.get("name").and_then(|n| n.as_str()).unwrap_or("");
                 let args = params.get("arguments").cloned().unwrap_or(json!({}));
 
-                // Check if tool exists first (MCP Quality Standard: -32803)
-                let tool_exists = tools::TOOLS.iter().any(|t| t.name == tool_name);
+                // Check if tool exists in core tools or any invention module
+                let tool_exists = tools::TOOLS.iter().any(|t| t.name == tool_name)
+                    || invention_visibility::TOOL_DEFS.iter().any(|t| t.name == tool_name)
+                    || invention_generation::TOOL_DEFS.iter().any(|t| t.name == tool_name)
+                    || invention_governance::TOOL_DEFS.iter().any(|t| t.name == tool_name)
+                    || invention_resilience::TOOL_DEFS.iter().any(|t| t.name == tool_name);
 
                 if !tool_exists {
                     json!({
@@ -158,7 +175,18 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     })
                 } else {
-                    match tools::handle_tool_call(tool_name, args, &mut engine).await {
+                    // Try invention modules first, then fall back to core tools
+                    let result = invention_visibility::try_handle(tool_name, args.clone(), &mut engine)
+                        .or_else(|| invention_generation::try_handle(tool_name, args.clone(), &mut engine))
+                        .or_else(|| invention_governance::try_handle(tool_name, args.clone(), &mut engine))
+                        .or_else(|| invention_resilience::try_handle(tool_name, args.clone(), &mut engine));
+
+                    let tool_result = match result {
+                        Some(r) => r,
+                        None => tools::handle_tool_call(tool_name, args, &mut engine).await,
+                    };
+
+                    match tool_result {
                         Ok(result) => json!({
                             "jsonrpc": "2.0",
                             "id": id,
