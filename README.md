@@ -203,8 +203,7 @@ npm install @agenticamem/contract
 pip install agentic-contract
 
 # cargo
-cargo install agentic-contract-cli
-cargo install agentic-contract-mcp
+cargo install agentic-contract-cli agentic-contract-mcp
 ```
 
 > **Standalone guarantee:** AgenticContract works independently. No other Agentra component is required.
