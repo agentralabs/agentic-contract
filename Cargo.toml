@@ -1,0 +1,41 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/agentic-contract",
+    "crates/agentic-contract-mcp",
+    "crates/agentic-contract-cli",
+    "crates/agentic-contract-ffi",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+license = "MIT"
+repository = "https://github.com/agentralabs/agentic-contract"
+homepage = "https://agentralabs.tech"
+authors = ["Agentra Labs <contact@agentralabs.tech>"]
+
+[workspace.dependencies]
+# SDK (shared sister traits)
+agentic-sdk = { version = "0.2.0", path = "../agentic-sdk" }
+
+# Core
+chrono = { version = "0.4", features = ["serde"] }
+blake3 = "1.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+
+# Async
+tokio = { version = "1.36", features = ["full"] }
+
+# MCP
+uuid = { version = "1.7", features = ["v4", "serde"] }
+
+# CLI
+clap = { version = "4.5", features = ["derive", "env"] }
+
+# Internal
+agentic-contract = { path = "crates/agentic-contract", version = "0.1.0" }

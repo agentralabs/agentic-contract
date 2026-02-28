@@ -1,0 +1,78 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.fleet/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.tox/
+
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Environment
+.env
+.env.local
+*.pem
+*.key
+
+# Agentic
+*.acon
+.agentic/
+
+# Claude Code
+.claude/
+.agentra/
+
+# Planning docs (internal only)
+planning-docs/
+CLAUDE-CODE-INSTRUCTIONS*.md
+SPEC-*.md
+
+# Internal vision / roadmap documents
+docs/VISION-*.md
+docs/internal/
+
+# Local goals (internal only)
+goals/
+
+# FFI (build artifacts)
+/ffi/

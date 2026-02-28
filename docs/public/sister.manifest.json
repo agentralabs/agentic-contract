@@ -1,0 +1,29 @@
+{
+  "key": "contract",
+  "name": "AgenticContract",
+  "page_ids": [
+    "overview",
+    "quickstart",
+    "installation",
+    "architecture",
+    "cli-reference",
+    "configuration",
+    "ffi-reference",
+    "mcp-tools",
+    "mcp-resources",
+    "mcp-prompts",
+    "troubleshooting",
+    "file-format",
+    "api-reference",
+    "benchmarks",
+    "concepts",
+    "faq",
+    "integration-guide",
+    "command-surface",
+    "experience-with-vs-without",
+    "primary-problem-coverage",
+    "initial-problem-coverage",
+    "playbooks-agent-integration",
+    "runtime-install-sync"
+  ]
+}

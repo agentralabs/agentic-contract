@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-contract"
+version = "0.1.0"
+description = "Policy engine for AI agents"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Agentra Labs", email = "contact@agentralabs.tech"}]
+keywords = ["ai", "agents", "contract", "policy", "governance"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://agentralabs.tech"
+Repository = "https://github.com/agentralabs/agentic-contract"

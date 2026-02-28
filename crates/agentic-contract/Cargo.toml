@@ -1,0 +1,29 @@
+[package]
+name = "agentic-contract"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Policy engine for AI agents — governance, risk limits, approvals, and compliance"
+keywords = ["ai", "agents", "contract", "policy", "governance"]
+categories = ["data-structures", "development-tools"]
+
+[dependencies]
+# SDK (shared sister traits)
+agentic-sdk = { workspace = true }
+
+chrono = { workspace = true }
+blake3 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3.10"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "contract_benchmarks"
+harness = false

@@ -1,0 +1,24 @@
+[package]
+name = "agentic-contract-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "CLI for AgenticContract"
+keywords = ["ai", "agent", "contract", "cli", "governance"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "acon"
+path = "src/main.rs"
+
+[dependencies]
+agentic-contract = { workspace = true }
+clap = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3.10"
