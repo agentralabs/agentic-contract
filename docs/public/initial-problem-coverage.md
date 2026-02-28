@@ -1,4 +1,5 @@
 ---
+status: stable
 title: Initial Problem Coverage
 description: The foundational problems AgenticContract addresses
 ---

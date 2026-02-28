@@ -1,4 +1,5 @@
 ---
+status: stable
 title: Primary Problem Coverage
 description: Problems that AgenticContract solves
 ---
