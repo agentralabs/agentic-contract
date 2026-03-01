@@ -306,7 +306,7 @@ fn check_server_auth() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 /// Run the MCP server on stdio.
-pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
+pub fn run_server() -> Result<(), Box<dyn std::error::Error>> {
     check_server_auth()?;
     let stdin = std::io::stdin().lock();
     let stdout = std::io::stdout().lock();
@@ -518,7 +518,7 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
 
                     let tool_result = match result {
                         Some(r) => r,
-                        None => tools::handle_tool_call(&tool_name, args, &mut engine).await,
+                        None => tools::handle_tool_call(&tool_name, args, &mut engine),
                     };
 
                     match tool_result {

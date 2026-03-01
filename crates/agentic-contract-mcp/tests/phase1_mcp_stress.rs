@@ -32,7 +32,7 @@ fn frame_message(msg: &str) -> Vec<u8> {
 // =========================================================================
 
 /// Dispatch a tool call through invention modules first, then core tools (same as server.rs).
-async fn dispatch_tool(
+fn dispatch_tool(
     tool: &str,
     args: Value,
     engine: &mut agentic_contract::ContractEngine,
@@ -47,7 +47,7 @@ async fn dispatch_tool(
 
     match result {
         Some(r) => r,
-        None => agentic_contract_mcp::tools::handle_tool_call(tool, args, engine).await,
+        None => agentic_contract_mcp::tools::handle_tool_call(tool, args, engine),
     }
 }
 
@@ -65,10 +65,10 @@ fn all_tool_defs() -> Vec<&'static agentic_contract_mcp::tools::ToolDefinition> 
 /// Macro to generate a smoke test that calls a tool with given args and asserts it returns Ok or Err.
 macro_rules! smoke_test_ok {
     ($name:ident, $tool:expr, $args:expr) => {
-        #[tokio::test]
-        async fn $name() {
+        #[test]
+        fn $name() {
             let mut engine = fresh_engine();
-            let result = dispatch_tool($tool, $args, &mut engine).await;
+            let result = dispatch_tool($tool, $args, &mut engine);
             assert!(
                 result.is_ok(),
                 "Tool '{}' should succeed but got: {:?}",
@@ -81,10 +81,10 @@ macro_rules! smoke_test_ok {
 
 macro_rules! smoke_test_err {
     ($name:ident, $tool:expr, $args:expr) => {
-        #[tokio::test]
-        async fn $name() {
+        #[test]
+        fn $name() {
             let mut engine = fresh_engine();
-            let result = dispatch_tool($tool, $args, &mut engine).await;
+            let result = dispatch_tool($tool, $args, &mut engine);
             assert!(
                 result.is_err(),
                 "Tool '{}' should fail but succeeded with: {:?}",
@@ -219,8 +219,8 @@ smoke_test_ok!(
 );
 
 // Tools that require pre-existing data (need IDs from prior tool calls)
-#[tokio::test]
-async fn smoke_policy_dna_extract() {
+#[test]
+fn smoke_policy_dna_extract() {
     let mut engine = fresh_engine();
     // First add a policy so we have a valid ID
     let val = agentic_contract_mcp::tools::handle_tool_call(
@@ -228,10 +228,9 @@ async fn smoke_policy_dna_extract() {
         json!({"label": "Test policy", "action": "allow", "scope": "global"}),
         &mut engine,
     )
-    .await
-    .expect("policy_add should succeed");
+        .expect("policy_add should succeed");
     let id = val["id"].as_str().expect("should have id field");
-    let result = dispatch_tool("policy_dna_extract", json!({"policy_id": id}), &mut engine).await;
+    let result = dispatch_tool("policy_dna_extract", json!({"policy_id": id}), &mut engine);
     assert!(
         result.is_ok(),
         "policy_dna_extract should succeed: {:?}",
@@ -239,31 +238,29 @@ async fn smoke_policy_dna_extract() {
     );
 }
 
-#[tokio::test]
-async fn smoke_contract_inheritance_create() {
+#[test]
+fn smoke_contract_inheritance_create() {
     let mut engine = fresh_engine();
     let v1 = agentic_contract_mcp::tools::handle_tool_call(
         "policy_add",
         json!({"label": "Parent policy", "action": "allow", "scope": "global"}),
         &mut engine,
     )
-    .await
-    .expect("policy_add should succeed");
+        .expect("policy_add should succeed");
     let parent_id = v1["id"].as_str().expect("should have id");
     let v2 = agentic_contract_mcp::tools::handle_tool_call(
         "policy_add",
         json!({"label": "Child policy", "action": "deny", "scope": "session"}),
         &mut engine,
     )
-    .await
-    .expect("policy_add should succeed");
+        .expect("policy_add should succeed");
     let child_id = v2["id"].as_str().expect("should have id");
     let result = dispatch_tool(
         "contract_inheritance_create",
         json!({"parent_id": parent_id, "child_id": child_id, "propagate": true}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(
         result.is_ok(),
         "contract_inheritance_create should succeed: {:?}",
@@ -271,23 +268,22 @@ async fn smoke_contract_inheritance_create() {
     );
 }
 
-#[tokio::test]
-async fn smoke_self_healing_contract_create() {
+#[test]
+fn smoke_self_healing_contract_create() {
     let mut engine = fresh_engine();
     let val = agentic_contract_mcp::tools::handle_tool_call(
         "contract_create",
         json!({"label": "Base contract"}),
         &mut engine,
     )
-    .await
-    .expect("contract_create should succeed");
+        .expect("contract_create should succeed");
     let base_id = val["id"].as_str().expect("should have id");
     let result = dispatch_tool(
         "self_healing_contract_create",
         json!({"base_contract_id": base_id}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(
         result.is_ok(),
         "self_healing_contract_create should succeed: {:?}",
@@ -338,13 +334,13 @@ fn test_all_38_tools_present() {
     let all = all_tool_defs();
     assert!(
         all.len() >= 38,
-        "Expected at least 38 combined tools (22 core + invention), got {}",
+        "Expected at least 38 combined tools (core + invention), got {}",
         all.len()
     );
     assert_eq!(
         agentic_contract_mcp::tools::TOOLS.len(),
-        22,
-        "Expected 22 core tools"
+        34,
+        "Expected 34 core tools"
     );
 }
 
@@ -576,46 +572,45 @@ fn test_jsonrpc_empty_string_version() {
 // Section 5: Concurrent tool execution
 // =========================================================================
 
-#[tokio::test]
-async fn test_concurrent_policy_adds() {
-    let engine = std::sync::Arc::new(tokio::sync::Mutex::new(fresh_engine()));
+#[test]
+fn test_concurrent_policy_adds() {
+    let engine = std::sync::Arc::new(std::sync::Mutex::new(fresh_engine()));
     let mut handles = Vec::new();
 
     for i in 0..50 {
         let engine = engine.clone();
-        handles.push(tokio::spawn(async move {
-            let mut eng = engine.lock().await;
+        handles.push(std::thread::spawn(move || {
+            let mut eng = engine.lock().unwrap();
             agentic_contract_mcp::tools::handle_tool_call(
                 "policy_add",
                 json!({"label": format!("Policy #{}", i)}),
                 &mut eng,
             )
-            .await
         }));
     }
 
     let mut success_count = 0;
     for handle in handles {
-        if handle.await.unwrap().is_ok() {
+        if handle.join().unwrap().is_ok() {
             success_count += 1;
         }
     }
     assert_eq!(success_count, 50);
 
-    let eng = engine.lock().await;
+    let eng = engine.lock().unwrap();
     let stats = eng.stats();
     assert!(stats.policy_count >= 50);
 }
 
-#[tokio::test]
-async fn test_concurrent_violation_reports() {
-    let engine = std::sync::Arc::new(tokio::sync::Mutex::new(fresh_engine()));
+#[test]
+fn test_concurrent_violation_reports() {
+    let engine = std::sync::Arc::new(std::sync::Mutex::new(fresh_engine()));
     let mut handles = Vec::new();
 
     for i in 0..100 {
         let engine = engine.clone();
-        handles.push(tokio::spawn(async move {
-            let mut eng = engine.lock().await;
+        handles.push(std::thread::spawn(move || {
+            let mut eng = engine.lock().unwrap();
             agentic_contract_mcp::tools::handle_tool_call(
                 "violation_report",
                 json!({
@@ -625,29 +620,28 @@ async fn test_concurrent_violation_reports() {
                 }),
                 &mut eng,
             )
-            .await
         }));
     }
 
     for handle in handles {
-        assert!(handle.await.unwrap().is_ok());
+        assert!(handle.join().unwrap().is_ok());
     }
 
-    let eng = engine.lock().await;
+    let eng = engine.lock().unwrap();
     let stats = eng.stats();
     assert_eq!(stats.violation_count, 100);
 }
 
-#[tokio::test]
-async fn test_concurrent_mixed_operations() {
-    let engine = std::sync::Arc::new(tokio::sync::Mutex::new(fresh_engine()));
+#[test]
+fn test_concurrent_mixed_operations() {
+    let engine = std::sync::Arc::new(std::sync::Mutex::new(fresh_engine()));
     let mut handles = Vec::new();
 
     // Mix policy adds, risk limits, violations, and obligations
     for i in 0..40 {
         let engine = engine.clone();
-        handles.push(tokio::spawn(async move {
-            let mut eng = engine.lock().await;
+        handles.push(std::thread::spawn(move || {
+            let mut eng = engine.lock().unwrap();
             match i % 4 {
                 0 => {
                     agentic_contract_mcp::tools::handle_tool_call(
@@ -655,7 +649,6 @@ async fn test_concurrent_mixed_operations() {
                         json!({"label": format!("P{}", i)}),
                         &mut eng,
                     )
-                    .await
                 }
                 1 => {
                     agentic_contract_mcp::tools::handle_tool_call(
@@ -663,31 +656,28 @@ async fn test_concurrent_mixed_operations() {
                         json!({"label": format!("L{}", i), "max_value": 100}),
                         &mut eng,
                     )
-                    .await
                 }
                 2 => agentic_contract_mcp::tools::handle_tool_call(
                     "violation_report",
                     json!({"description": format!("V{}", i), "severity": "info", "agent_id": "a1"}),
                     &mut eng,
-                )
-                .await,
+                ),
                 _ => {
                     agentic_contract_mcp::tools::handle_tool_call(
                         "obligation_add",
                         json!({"label": format!("O{}", i), "deadline": future_dt()}),
                         &mut eng,
                     )
-                    .await
                 }
             }
         }));
     }
 
     for handle in handles {
-        assert!(handle.await.unwrap().is_ok());
+        assert!(handle.join().unwrap().is_ok());
     }
 
-    let eng = engine.lock().await;
+    let eng = engine.lock().unwrap();
     let stats = eng.stats();
     let total = stats.policy_count
         + stats.risk_limit_count
@@ -700,21 +690,21 @@ async fn test_concurrent_mixed_operations() {
 // Section 6: Tool boundary and error path tests
 // =========================================================================
 
-#[tokio::test]
-async fn test_empty_label_policy() {
+#[test]
+fn test_empty_label_policy() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "policy_add",
         json!({"label": ""}),
         &mut engine,
     )
-    .await;
+    ;
     // Should still work — no minimum length enforced
     assert!(result.is_ok());
 }
 
-#[tokio::test]
-async fn test_very_long_label() {
+#[test]
+fn test_very_long_label() {
     let mut engine = fresh_engine();
     let long_label = "A".repeat(10_000);
     let result = agentic_contract_mcp::tools::handle_tool_call(
@@ -722,12 +712,12 @@ async fn test_very_long_label() {
         json!({"label": long_label}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
 }
 
-#[tokio::test]
-async fn test_special_chars_in_labels() {
+#[test]
+fn test_special_chars_in_labels() {
     let mut engine = fresh_engine();
     let specials = [
         "label with\nnewlines",
@@ -745,13 +735,13 @@ async fn test_special_chars_in_labels() {
             json!({"label": label}),
             &mut engine,
         )
-        .await;
+        ;
         assert!(result.is_ok(), "Failed for label: {:?}", label);
     }
 }
 
-#[tokio::test]
-async fn test_missing_required_fields() {
+#[test]
+fn test_missing_required_fields() {
     let mut engine = fresh_engine();
 
     // policy_add missing label
@@ -760,14 +750,14 @@ async fn test_missing_required_fields() {
         json!({"scope": "global"}),
         &mut engine,
     )
-    .await;
+    ;
     // Should handle gracefully — either error or default
     // The important thing is it doesn't panic
     let _ = result;
 }
 
-#[tokio::test]
-async fn test_wrong_types_in_args() {
+#[test]
+fn test_wrong_types_in_args() {
     let mut engine = fresh_engine();
 
     // max_value should be number, pass string
@@ -776,76 +766,76 @@ async fn test_wrong_types_in_args() {
         json!({"label": "test", "max_value": "not a number"}),
         &mut engine,
     )
-    .await;
+    ;
     // Should handle gracefully
     let _ = result;
 }
 
-#[tokio::test]
-async fn test_negative_risk_limit() {
+#[test]
+fn test_negative_risk_limit() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "risk_limit_set",
         json!({"label": "negative", "max_value": -1}),
         &mut engine,
     )
-    .await;
+    ;
     // Should handle gracefully
     let _ = result;
 }
 
-#[tokio::test]
-async fn test_zero_risk_limit() {
+#[test]
+fn test_zero_risk_limit() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "risk_limit_set",
         json!({"label": "zero", "max_value": 0}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
 }
 
-#[tokio::test]
-async fn test_massive_risk_limit() {
+#[test]
+fn test_massive_risk_limit() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "risk_limit_set",
         json!({"label": "huge", "max_value": f64::MAX}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
 }
 
-#[tokio::test]
-async fn test_past_deadline_obligation() {
+#[test]
+fn test_past_deadline_obligation() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "obligation_add",
         json!({"label": "overdue", "deadline": "2020-01-01T00:00:00Z"}),
         &mut engine,
     )
-    .await;
+    ;
     // Should still create — deadline enforcement at check time
     assert!(result.is_ok());
 }
 
-#[tokio::test]
-async fn test_invalid_datetime_obligation() {
+#[test]
+fn test_invalid_datetime_obligation() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "obligation_add",
         json!({"label": "bad date", "deadline": "not-a-date"}),
         &mut engine,
     )
-    .await;
+    ;
     // Should handle gracefully
     let _ = result;
 }
 
-#[tokio::test]
-async fn test_all_severity_levels() {
+#[test]
+fn test_all_severity_levels() {
     let mut engine = fresh_engine();
     let severities = ["info", "warning", "critical", "fatal"];
     for sev in &severities {
@@ -854,13 +844,13 @@ async fn test_all_severity_levels() {
             json!({"description": format!("test {}", sev), "severity": sev, "agent_id": "a1"}),
             &mut engine,
         )
-        .await;
+        ;
         assert!(result.is_ok(), "Failed for severity: {}", sev);
     }
 }
 
-#[tokio::test]
-async fn test_all_policy_scopes() {
+#[test]
+fn test_all_policy_scopes() {
     let mut engine = fresh_engine();
     for scope in &["global", "session", "agent"] {
         let result = agentic_contract_mcp::tools::handle_tool_call(
@@ -868,13 +858,13 @@ async fn test_all_policy_scopes() {
             json!({"label": format!("{} policy", scope), "scope": scope}),
             &mut engine,
         )
-        .await;
+        ;
         assert!(result.is_ok(), "Failed for scope: {}", scope);
     }
 }
 
-#[tokio::test]
-async fn test_all_policy_actions() {
+#[test]
+fn test_all_policy_actions() {
     let mut engine = fresh_engine();
     for action in &["allow", "deny", "require_approval", "audit_only"] {
         let result = agentic_contract_mcp::tools::handle_tool_call(
@@ -882,13 +872,13 @@ async fn test_all_policy_actions() {
             json!({"label": format!("{} action", action), "action": action}),
             &mut engine,
         )
-        .await;
+        ;
         assert!(result.is_ok(), "Failed for action: {}", action);
     }
 }
 
-#[tokio::test]
-async fn test_all_limit_types() {
+#[test]
+fn test_all_limit_types() {
     let mut engine = fresh_engine();
     for lt in &["rate", "threshold", "budget", "count"] {
         let result = agentic_contract_mcp::tools::handle_tool_call(
@@ -896,7 +886,7 @@ async fn test_all_limit_types() {
             json!({"label": format!("{} limit", lt), "max_value": 100, "limit_type": lt}),
             &mut engine,
         )
-        .await;
+        ;
         assert!(result.is_ok(), "Failed for limit_type: {}", lt);
     }
 }
@@ -905,8 +895,8 @@ async fn test_all_limit_types() {
 // Section 7: Stats accuracy after bulk operations
 // =========================================================================
 
-#[tokio::test]
-async fn test_stats_after_bulk_load() {
+#[test]
+fn test_stats_after_bulk_load() {
     let mut engine = fresh_engine();
 
     // Add various entities
@@ -916,8 +906,7 @@ async fn test_stats_after_bulk_load() {
             json!({"label": format!("P{}", i)}),
             &mut engine,
         )
-        .await
-        .unwrap();
+                .unwrap();
     }
     for i in 0..15 {
         agentic_contract_mcp::tools::handle_tool_call(
@@ -925,8 +914,7 @@ async fn test_stats_after_bulk_load() {
             json!({"label": format!("L{}", i), "max_value": i * 10 + 1}),
             &mut engine,
         )
-        .await
-        .unwrap();
+                .unwrap();
     }
     for i in 0..10 {
         agentic_contract_mcp::tools::handle_tool_call(
@@ -934,8 +922,7 @@ async fn test_stats_after_bulk_load() {
             json!({"label": format!("O{}", i), "deadline": future_dt()}),
             &mut engine,
         )
-        .await
-        .unwrap();
+                .unwrap();
     }
     for i in 0..25 {
         agentic_contract_mcp::tools::handle_tool_call(
@@ -943,14 +930,12 @@ async fn test_stats_after_bulk_load() {
             json!({"description": format!("V{}", i), "severity": "info", "agent_id": "a1"}),
             &mut engine,
         )
-        .await
-        .unwrap();
+                .unwrap();
     }
 
     let stats =
         agentic_contract_mcp::tools::handle_tool_call("contract_stats", json!({}), &mut engine)
-            .await
-            .unwrap();
+                        .unwrap();
 
     assert!(stats["policy_count"].as_u64().unwrap() >= 20);
     assert!(stats["risk_limit_count"].as_u64().unwrap() >= 15);
@@ -962,8 +947,8 @@ async fn test_stats_after_bulk_load() {
 // Section 8: Contract lifecycle through MCP
 // =========================================================================
 
-#[tokio::test]
-async fn test_contract_create_sign_verify_list_get() {
+#[test]
+fn test_contract_create_sign_verify_list_get() {
     let mut engine = fresh_engine();
 
     // Create
@@ -972,8 +957,7 @@ async fn test_contract_create_sign_verify_list_get() {
         json!({"label": "Service Agreement", "parties": ["agent_a", "agent_b"], "description": "Mutual trust"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     let cid = created["id"].as_str().unwrap().to_string();
 
     // Sign
@@ -982,8 +966,7 @@ async fn test_contract_create_sign_verify_list_get() {
         json!({"contract_id": &cid, "signer": "agent_a"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     assert_eq!(signed["signed"], true);
 
     // Verify
@@ -992,15 +975,13 @@ async fn test_contract_create_sign_verify_list_get() {
         json!({"contract_id": &cid}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     assert!(verified.get("valid").is_some());
 
     // List
     let list =
         agentic_contract_mcp::tools::handle_tool_call("contract_list", json!({}), &mut engine)
-            .await
-            .unwrap();
+                        .unwrap();
     assert!(list["count"].as_u64().unwrap() >= 1);
 
     // Get
@@ -1009,7 +990,6 @@ async fn test_contract_create_sign_verify_list_get() {
         json!({"id": &cid}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     assert_eq!(got["label"], "Service Agreement");
 }

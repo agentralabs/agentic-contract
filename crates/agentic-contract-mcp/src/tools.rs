@@ -459,7 +459,7 @@ fn top_matches(engine: &agentic_contract::ContractEngine, query: &str, limit: us
 // ---------------------------------------------------------------------------
 
 /// Handle a tool call.
-pub async fn handle_tool_call(
+pub fn handle_tool_call(
     name: &str,
     args: Value,
     engine: &mut agentic_contract::ContractEngine,

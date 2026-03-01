@@ -93,22 +93,22 @@ fn test_prompt_count() {
 // Section 2: Policy edge cases
 // =========================================================================
 
-#[tokio::test]
-async fn test_policy_add_minimal() {
+#[test]
+fn test_policy_add_minimal() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "policy_add",
         json!({"label": "No deploys on Friday"}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
     let val = result.unwrap();
     assert!(val.get("id").is_some());
 }
 
-#[tokio::test]
-async fn test_policy_add_full() {
+#[test]
+fn test_policy_add_full() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "policy_add",
@@ -121,26 +121,26 @@ async fn test_policy_add_full() {
         }),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
 }
 
-#[tokio::test]
-async fn test_policy_check_allow() {
+#[test]
+fn test_policy_check_allow() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "policy_check",
         json!({"action_type": "read_file", "scope": "global"}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
     let val = result.unwrap();
     assert_eq!(val["allowed"], true);
 }
 
-#[tokio::test]
-async fn test_policy_check_deny() {
+#[test]
+fn test_policy_check_deny() {
     let mut engine = fresh_engine();
     // Add a deny policy
     agentic_contract_mcp::tools::handle_tool_call(
@@ -148,25 +148,24 @@ async fn test_policy_check_deny() {
         json!({"label": "deploy", "scope": "global", "action": "deny"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
 
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "policy_check",
         json!({"action_type": "deploy", "scope": "global"}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
     let val = result.unwrap();
     assert_eq!(val["allowed"], false);
 }
 
-#[tokio::test]
-async fn test_policy_list_empty() {
+#[test]
+fn test_policy_list_empty() {
     let mut engine = fresh_engine();
     let result =
-        agentic_contract_mcp::tools::handle_tool_call("policy_list", json!({}), &mut engine).await;
+        agentic_contract_mcp::tools::handle_tool_call("policy_list", json!({}), &mut engine);
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["count"], 0);
 }
@@ -175,16 +174,15 @@ async fn test_policy_list_empty() {
 // Section 3: Risk limit edge cases
 // =========================================================================
 
-#[tokio::test]
-async fn test_risk_limit_set_and_check() {
+#[test]
+fn test_risk_limit_set_and_check() {
     let mut engine = fresh_engine();
     agentic_contract_mcp::tools::handle_tool_call(
         "risk_limit_set",
         json!({"label": "API calls", "max_value": 100, "limit_type": "rate"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
 
     // Should not be exceeded
     let result = agentic_contract_mcp::tools::handle_tool_call(
@@ -192,17 +190,16 @@ async fn test_risk_limit_set_and_check() {
         json!({"label": "api", "amount": 50}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     assert_eq!(result["exceeded"], false);
 }
 
-#[tokio::test]
-async fn test_risk_limit_list_empty() {
+#[test]
+fn test_risk_limit_list_empty() {
     let mut engine = fresh_engine();
     let result =
         agentic_contract_mcp::tools::handle_tool_call("risk_limit_list", json!({}), &mut engine)
-            .await;
+            ;
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["count"], 0);
 }
@@ -211,8 +208,8 @@ async fn test_risk_limit_list_empty() {
 // Section 4: Approval workflow edge cases
 // =========================================================================
 
-#[tokio::test]
-async fn test_approval_request_invalid_rule() {
+#[test]
+fn test_approval_request_invalid_rule() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "approval_request",
@@ -223,16 +220,16 @@ async fn test_approval_request_invalid_rule() {
         }),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_err());
 }
 
-#[tokio::test]
-async fn test_approval_list_empty() {
+#[test]
+fn test_approval_list_empty() {
     let mut engine = fresh_engine();
     let result =
         agentic_contract_mcp::tools::handle_tool_call("approval_list", json!({}), &mut engine)
-            .await;
+            ;
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["count"], 0);
 }
@@ -241,8 +238,8 @@ async fn test_approval_list_empty() {
 // Section 5: Obligation edge cases
 // =========================================================================
 
-#[tokio::test]
-async fn test_obligation_add() {
+#[test]
+fn test_obligation_add() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "obligation_add",
@@ -253,19 +250,19 @@ async fn test_obligation_add() {
         }),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
     let val = result.unwrap();
     assert!(val.get("id").is_some());
     assert_eq!(val["status"], "pending");
 }
 
-#[tokio::test]
-async fn test_obligation_check_all() {
+#[test]
+fn test_obligation_check_all() {
     let mut engine = fresh_engine();
     let result =
         agentic_contract_mcp::tools::handle_tool_call("obligation_check", json!({}), &mut engine)
-            .await;
+            ;
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["count"], 0);
 }
@@ -274,8 +271,8 @@ async fn test_obligation_check_all() {
 // Section 6: Violation edge cases
 // =========================================================================
 
-#[tokio::test]
-async fn test_violation_report() {
+#[test]
+fn test_violation_report() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "violation_report",
@@ -286,14 +283,14 @@ async fn test_violation_report() {
         }),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
     let val = result.unwrap();
     assert!(val.get("id").is_some());
 }
 
-#[tokio::test]
-async fn test_violation_list_by_severity() {
+#[test]
+fn test_violation_list_by_severity() {
     let mut engine = fresh_engine();
     // Add violations of different severity
     agentic_contract_mcp::tools::handle_tool_call(
@@ -301,15 +298,13 @@ async fn test_violation_list_by_severity() {
         json!({"description": "Info event", "severity": "info", "agent_id": "agent_1"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     agentic_contract_mcp::tools::handle_tool_call(
         "violation_report",
         json!({"description": "Critical breach", "severity": "critical", "agent_id": "agent_2"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
 
     // Filter by critical only
     let result = agentic_contract_mcp::tools::handle_tool_call(
@@ -317,8 +312,7 @@ async fn test_violation_list_by_severity() {
         json!({"severity": "critical"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     assert_eq!(result["count"], 1);
 }
 
@@ -326,18 +320,18 @@ async fn test_violation_list_by_severity() {
 // Section 7: Unknown tool and context log
 // =========================================================================
 
-#[tokio::test]
-async fn test_unknown_tool_returns_error() {
+#[test]
+fn test_unknown_tool_returns_error() {
     let mut engine = fresh_engine();
     let result =
         agentic_contract_mcp::tools::handle_tool_call("nonexistent_tool", json!({}), &mut engine)
-            .await;
+            ;
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("Unknown tool"));
 }
 
-#[tokio::test]
-async fn test_context_log() {
+#[test]
+fn test_context_log() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "contract_context_log",
@@ -348,7 +342,7 @@ async fn test_context_log() {
         }),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["logged"], true);
 }
@@ -357,20 +351,20 @@ async fn test_context_log() {
 // Section 8: Unicode and special characters
 // =========================================================================
 
-#[tokio::test]
-async fn test_unicode_policy_label() {
+#[test]
+fn test_unicode_policy_label() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "policy_add",
         json!({"label": "禁止周五部署 🚫", "scope": "global", "action": "deny"}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
 }
 
-#[tokio::test]
-async fn test_emoji_in_violation() {
+#[test]
+fn test_emoji_in_violation() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "violation_report",
@@ -381,7 +375,7 @@ async fn test_emoji_in_violation() {
         }),
         &mut engine,
     )
-    .await;
+    ;
     assert!(result.is_ok());
 }
 
@@ -389,8 +383,8 @@ async fn test_emoji_in_violation() {
 // Section 9: Full lifecycle workflow
 // =========================================================================
 
-#[tokio::test]
-async fn test_full_governance_lifecycle() {
+#[test]
+fn test_full_governance_lifecycle() {
     let mut engine = fresh_engine();
 
     // 1. Create a contract
@@ -403,8 +397,7 @@ async fn test_full_governance_lifecycle() {
         }),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     let contract_id = contract["id"].as_str().unwrap();
 
     // 2. Sign the contract
@@ -413,8 +406,7 @@ async fn test_full_governance_lifecycle() {
         json!({"contract_id": contract_id, "signer": "admin"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     assert_eq!(signed["signed"], true);
 
     // 3. Add a policy
@@ -423,8 +415,7 @@ async fn test_full_governance_lifecycle() {
         json!({"label": "deploy", "scope": "global", "action": "require_approval"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
 
     // 4. Check the policy
     let check = agentic_contract_mcp::tools::handle_tool_call(
@@ -432,8 +423,7 @@ async fn test_full_governance_lifecycle() {
         json!({"action_type": "deploy"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     assert_eq!(check["allowed"], false); // RequireApproval counts as not immediately allowed
 
     // 5. Set a risk limit
@@ -442,8 +432,7 @@ async fn test_full_governance_lifecycle() {
         json!({"label": "API calls per hour", "max_value": 1000, "limit_type": "rate"}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
 
     // 6. Add an obligation
     agentic_contract_mcp::tools::handle_tool_call(
@@ -451,8 +440,7 @@ async fn test_full_governance_lifecycle() {
         json!({"label": "Weekly report", "deadline": future_dt()}),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
 
     // 7. Report a violation
     agentic_contract_mcp::tools::handle_tool_call(
@@ -464,14 +452,12 @@ async fn test_full_governance_lifecycle() {
         }),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
 
     // 8. Verify stats
     let stats =
         agentic_contract_mcp::tools::handle_tool_call("contract_stats", json!({}), &mut engine)
-            .await
-            .unwrap();
+                        .unwrap();
     assert!(stats["policy_count"].as_u64().unwrap() >= 2);
     assert_eq!(stats["risk_limit_count"], 1);
     assert_eq!(stats["violation_count"], 1);
@@ -482,8 +468,8 @@ async fn test_full_governance_lifecycle() {
 // Section 10: Condition tools
 // =========================================================================
 
-#[tokio::test]
-async fn test_condition_add_and_evaluate() {
+#[test]
+fn test_condition_add_and_evaluate() {
     let mut engine = fresh_engine();
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "condition_add",
@@ -494,8 +480,7 @@ async fn test_condition_add_and_evaluate() {
         }),
         &mut engine,
     )
-    .await
-    .unwrap();
+        .unwrap();
     let condition_id = result["id"].as_str().unwrap();
 
     let eval = agentic_contract_mcp::tools::handle_tool_call(
@@ -503,7 +488,7 @@ async fn test_condition_add_and_evaluate() {
         json!({"id": condition_id}),
         &mut engine,
     )
-    .await;
+    ;
     assert!(eval.is_ok());
 }
 
