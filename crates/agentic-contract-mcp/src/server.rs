@@ -331,7 +331,9 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
     let mut engine = if acon_path.exists() {
         agentic_contract::ContractEngine::open(&acon_path).map_err(|e| e.to_string())?
     } else {
-        agentic_contract::ContractEngine::new()
+        let mut e = agentic_contract::ContractEngine::new();
+        e.file.path = Some(acon_path.clone());
+        e
     };
 
     tracing::info!("AgenticContract MCP server started");
@@ -344,7 +346,10 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
         let msg = match transport.read_message() {
             Ok(m) => m,
             Err(TransportError::Io(ref e)) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
-                tracing::info!("Client disconnected");
+                tracing::info!("Client disconnected, saving before exit");
+                if let Err(e) = engine.save() {
+                    tracing::error!("Failed to save on disconnect: {}", e);
+                }
                 break;
             }
             Err(e) => {
@@ -517,16 +522,22 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error>> {
                     };
 
                     match tool_result {
-                        Ok(result) => json!({
-                            "jsonrpc": "2.0",
-                            "id": id,
-                            "result": {
-                                "content": [{
-                                    "type": "text",
-                                    "text": serde_json::to_string_pretty(&result).unwrap_or_default()
-                                }]
+                        Ok(result) => {
+                            // Persist after every successful tool call
+                            if let Err(save_err) = engine.save() {
+                                tracing::error!("Failed to save after tool call: {}", save_err);
                             }
-                        }),
+                            json!({
+                                "jsonrpc": "2.0",
+                                "id": id,
+                                "result": {
+                                    "content": [{
+                                        "type": "text",
+                                        "text": serde_json::to_string_pretty(&result).unwrap_or_default()
+                                    }]
+                                }
+                            })
+                        }
                         Err(e) => json!({
                             "jsonrpc": "2.0",
                             "id": id,
