@@ -5,6 +5,7 @@
 //! in a single `.acon` file.
 
 pub mod approval;
+pub mod bridges;
 pub mod condition;
 pub mod contract_engine;
 pub mod contracts;
