@@ -251,9 +251,9 @@ install_from_source() {
     fi
 
     if [ "$DRY_RUN" = true ]; then
-        echo "  [dry-run] Would run: cargo install --git ${git_url} ${source_ref_text}--locked --force agentic-contract"
+        echo "  [dry-run] Would run: cargo install --git ${git_url} ${source_ref_text}--locked --force agentic-contract-cli"
         echo "  [dry-run] Would run: cargo install --git ${git_url} ${source_ref_text}--locked --force agentic-contract-mcp"
-        echo "  [dry-run] Would copy from ${cargo_bin}/(acontract,${BINARY_NAME}) to ${INSTALL_DIR}/"
+        echo "  [dry-run] Would copy from ${cargo_bin}/(acon,${BINARY_NAME}) to ${INSTALL_DIR}/"
         return
     fi
 
@@ -265,21 +265,29 @@ install_from_source() {
 
     if [ -n "${VERSION:-}" ] && [ "${VERSION}" != "latest" ]; then
         run_with_progress 45 68 "Installing agentic-contract" \
-            cargo install --git "${git_url}" --tag "${VERSION}" --locked --force agentic-contract
+            cargo install --git "${git_url}" --tag "${VERSION}" --locked --force agentic-contract-cli
         run_with_progress 68 85 "Installing agentic-contract-mcp" \
             cargo install --git "${git_url}" --tag "${VERSION}" --locked --force agentic-contract-mcp
     else
         run_with_progress 45 68 "Installing agentic-contract" \
-            cargo install --git "${git_url}" --locked --force agentic-contract
+            cargo install --git "${git_url}" --locked --force agentic-contract-cli
         run_with_progress 68 85 "Installing agentic-contract-mcp" \
             cargo install --git "${git_url}" --locked --force agentic-contract-mcp
     fi
 
     mkdir -p "${INSTALL_DIR}"
-    cp "${cargo_bin}/acontract" "${INSTALL_DIR}/acontract"
+    if [ -f "${cargo_bin}/acon" ]; then
+        cp "${cargo_bin}/acon" "${INSTALL_DIR}/acon"
+    elif [ -f "${cargo_bin}/acontract" ]; then
+        # Backward compatibility for older binary naming.
+        cp "${cargo_bin}/acontract" "${INSTALL_DIR}/acon"
+    else
+        echo "Error: expected CLI binary not found in ${cargo_bin} (acon)" >&2
+        exit 1
+    fi
     cp "${cargo_bin}/${BINARY_NAME}" "${INSTALL_DIR}/${BINARY_NAME}"
-    chmod +x "${INSTALL_DIR}/acontract" "${INSTALL_DIR}/${BINARY_NAME}"
-    echo "  Installed from source to ${INSTALL_DIR}/acontract and ${INSTALL_DIR}/${BINARY_NAME}"
+    chmod +x "${INSTALL_DIR}/acon" "${INSTALL_DIR}/${BINARY_NAME}"
+    echo "  Installed from source to ${INSTALL_DIR}/acon and ${INSTALL_DIR}/${BINARY_NAME}"
 }
 
 install_mcp_entrypoint() {
@@ -481,6 +489,7 @@ PY
 merge_config() {
     local config_file="$1"
     local config_dir
+    local tmp_file
     config_dir="$(dirname "$config_file")"
 
     if [ "$DRY_RUN" = true ]; then
@@ -493,14 +502,15 @@ merge_config() {
     if command -v jq >/dev/null 2>&1; then
         if [ -f "$config_file" ] && [ -s "$config_file" ]; then
             echo "    Existing config found, merging..."
+            tmp_file="$(mktemp "${config_file}.tmp.XXXXXX")"
             if jq --arg key "$SERVER_KEY" \
                --arg cmd "${MCP_ENTRYPOINT}" \
                --argjson args "$SERVER_ARGS_JSON" \
                '.mcpServers //= {} | .mcpServers[$key] = {"command": $cmd, "args": $args}' \
-               "$config_file" > "$config_file.tmp"; then
-                mv "$config_file.tmp" "$config_file"
+               "$config_file" > "$tmp_file" && [ -f "$tmp_file" ]; then
+                mv "$tmp_file" "$config_file"
             else
-                rm -f "$config_file.tmp"
+                rm -f "$tmp_file"
                 echo "    jq merge failed; retrying with python3 fallback..."
                 merge_config_with_python "$config_file"
             fi
