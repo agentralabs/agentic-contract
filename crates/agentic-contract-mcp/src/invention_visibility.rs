@@ -796,14 +796,14 @@ fn handle_policy_omniscience_conflicts(
 
             if is_conflict || is_ambiguous {
                 let severity = if is_conflict { "conflict" } else { "ambiguous" };
-                let resolution =
-                    if pa.scope == PolicyScope::Agent && pb.scope == PolicyScope::Global {
-                        "Agent-scope policy takes precedence over global"
-                    } else if pa.scope == PolicyScope::Global && pb.scope == PolicyScope::Agent {
-                        "Agent-scope policy takes precedence over global"
-                    } else {
-                        "Stricter policy (deny > require_approval > audit > allow) should win"
-                    };
+                let resolution = if (pa.scope == PolicyScope::Agent
+                    && pb.scope == PolicyScope::Global)
+                    || (pa.scope == PolicyScope::Global && pb.scope == PolicyScope::Agent)
+                {
+                    "Agent-scope policy takes precedence over global"
+                } else {
+                    "Stricter policy (deny > require_approval > audit > allow) should win"
+                };
 
                 conflicts.push(json!({
                     "policy_a": {
@@ -1208,8 +1208,8 @@ fn handle_approval_telepathy_predict(
         "action": action,
         "requestor": requestor,
         "approval_probability": probability,
-        "confidence": if probability > 0.8 || probability < 0.2 { "high" }
-            else if probability > 0.6 || probability < 0.4 { "moderate" }
+        "confidence": if !(0.2..=0.8).contains(&probability) { "high" }
+            else if !(0.4..=0.6).contains(&probability) { "moderate" }
             else { "low" },
         "likely_approvers": likely_approvers,
         "estimated_response_secs": avg_response,
@@ -1510,8 +1510,7 @@ fn handle_obligation_clairvoyance_forecast(
                 return false;
             }
             // Check if obligation mentions the agent
-            word_overlap(&o.label, agent_id) > 0.1 || o.label.contains(agent_id) || true
-            // Include all for broad forecast
+            word_overlap(&o.label, agent_id) > 0.1 || o.label.contains(agent_id)
         })
         .filter(|o| o.deadline.map(|d| d <= deadline_cutoff).unwrap_or(true))
         .collect();

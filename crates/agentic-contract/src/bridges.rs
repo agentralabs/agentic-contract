@@ -67,7 +67,11 @@ pub trait TimeBridge: Send + Sync {
     }
 
     /// Schedule an approval timeout
-    fn schedule_approval_timeout(&self, request_id: &str, timeout_at: u64) -> Result<String, String> {
+    fn schedule_approval_timeout(
+        &self,
+        request_id: &str,
+        timeout_at: u64,
+    ) -> Result<String, String> {
         let _ = (request_id, timeout_at);
         Err("Time bridge not connected".to_string())
     }
@@ -142,7 +146,7 @@ impl VisionBridge for NoOpBridges {}
 impl CommBridge for NoOpBridges {}
 
 /// Configuration for which bridges are active.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct BridgeConfig {
     pub memory_enabled: bool,
     pub identity_enabled: bool,
@@ -150,19 +154,6 @@ pub struct BridgeConfig {
     pub codebase_enabled: bool,
     pub vision_enabled: bool,
     pub comm_enabled: bool,
-}
-
-impl Default for BridgeConfig {
-    fn default() -> Self {
-        Self {
-            memory_enabled: false,
-            identity_enabled: false,
-            time_enabled: false,
-            codebase_enabled: false,
-            vision_enabled: false,
-            comm_enabled: false,
-        }
-    }
 }
 
 /// Hydra adapter trait — future orchestrator discovery interface.
@@ -258,7 +249,7 @@ mod tests {
 
     #[test]
     fn noop_bridges_default_and_clone() {
-        let b = NoOpBridges::default();
+        let b = NoOpBridges;
         let _b2 = b.clone();
     }
 }

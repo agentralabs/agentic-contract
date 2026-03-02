@@ -407,8 +407,7 @@ fn test_resources_no_duplicate_uris() {
 fn test_tool_error_is_string() {
     let mut engine = agentic_contract::ContractEngine::new();
     let result =
-        agentic_contract_mcp::tools::handle_tool_call("nonexistent_tool", json!({}), &mut engine)
-            ;
+        agentic_contract_mcp::tools::handle_tool_call("nonexistent_tool", json!({}), &mut engine);
     assert!(result.is_err());
     let err = result.unwrap_err();
     // Error should be a displayable string
@@ -419,8 +418,7 @@ fn test_tool_error_is_string() {
 fn test_tool_success_returns_json() {
     let mut engine = agentic_contract::ContractEngine::new();
     let result =
-        agentic_contract_mcp::tools::handle_tool_call("contract_stats", json!({}), &mut engine)
-            ;
+        agentic_contract_mcp::tools::handle_tool_call("contract_stats", json!({}), &mut engine);
     assert!(result.is_ok());
     let val = result.unwrap();
     // Should be a JSON object

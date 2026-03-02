@@ -228,7 +228,7 @@ fn smoke_policy_dna_extract() {
         json!({"label": "Test policy", "action": "allow", "scope": "global"}),
         &mut engine,
     )
-        .expect("policy_add should succeed");
+    .expect("policy_add should succeed");
     let id = val["id"].as_str().expect("should have id field");
     let result = dispatch_tool("policy_dna_extract", json!({"policy_id": id}), &mut engine);
     assert!(
@@ -246,21 +246,20 @@ fn smoke_contract_inheritance_create() {
         json!({"label": "Parent policy", "action": "allow", "scope": "global"}),
         &mut engine,
     )
-        .expect("policy_add should succeed");
+    .expect("policy_add should succeed");
     let parent_id = v1["id"].as_str().expect("should have id");
     let v2 = agentic_contract_mcp::tools::handle_tool_call(
         "policy_add",
         json!({"label": "Child policy", "action": "deny", "scope": "session"}),
         &mut engine,
     )
-        .expect("policy_add should succeed");
+    .expect("policy_add should succeed");
     let child_id = v2["id"].as_str().expect("should have id");
     let result = dispatch_tool(
         "contract_inheritance_create",
         json!({"parent_id": parent_id, "child_id": child_id, "propagate": true}),
         &mut engine,
-    )
-    ;
+    );
     assert!(
         result.is_ok(),
         "contract_inheritance_create should succeed: {:?}",
@@ -276,14 +275,13 @@ fn smoke_self_healing_contract_create() {
         json!({"label": "Base contract"}),
         &mut engine,
     )
-        .expect("contract_create should succeed");
+    .expect("contract_create should succeed");
     let base_id = val["id"].as_str().expect("should have id");
     let result = dispatch_tool(
         "self_healing_contract_create",
         json!({"base_contract_id": base_id}),
         &mut engine,
-    )
-    ;
+    );
     assert!(
         result.is_ok(),
         "self_healing_contract_create should succeed: {:?}",
@@ -643,32 +641,26 @@ fn test_concurrent_mixed_operations() {
         handles.push(std::thread::spawn(move || {
             let mut eng = engine.lock().unwrap();
             match i % 4 {
-                0 => {
-                    agentic_contract_mcp::tools::handle_tool_call(
-                        "policy_add",
-                        json!({"label": format!("P{}", i)}),
-                        &mut eng,
-                    )
-                }
-                1 => {
-                    agentic_contract_mcp::tools::handle_tool_call(
-                        "risk_limit_set",
-                        json!({"label": format!("L{}", i), "max_value": 100}),
-                        &mut eng,
-                    )
-                }
+                0 => agentic_contract_mcp::tools::handle_tool_call(
+                    "policy_add",
+                    json!({"label": format!("P{}", i)}),
+                    &mut eng,
+                ),
+                1 => agentic_contract_mcp::tools::handle_tool_call(
+                    "risk_limit_set",
+                    json!({"label": format!("L{}", i), "max_value": 100}),
+                    &mut eng,
+                ),
                 2 => agentic_contract_mcp::tools::handle_tool_call(
                     "violation_report",
                     json!({"description": format!("V{}", i), "severity": "info", "agent_id": "a1"}),
                     &mut eng,
                 ),
-                _ => {
-                    agentic_contract_mcp::tools::handle_tool_call(
-                        "obligation_add",
-                        json!({"label": format!("O{}", i), "deadline": future_dt()}),
-                        &mut eng,
-                    )
-                }
+                _ => agentic_contract_mcp::tools::handle_tool_call(
+                    "obligation_add",
+                    json!({"label": format!("O{}", i), "deadline": future_dt()}),
+                    &mut eng,
+                ),
             }
         }));
     }
@@ -697,8 +689,7 @@ fn test_empty_label_policy() {
         "policy_add",
         json!({"label": ""}),
         &mut engine,
-    )
-    ;
+    );
     // Should still work — no minimum length enforced
     assert!(result.is_ok());
 }
@@ -711,8 +702,7 @@ fn test_very_long_label() {
         "policy_add",
         json!({"label": long_label}),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
 }
 
@@ -734,8 +724,7 @@ fn test_special_chars_in_labels() {
             "policy_add",
             json!({"label": label}),
             &mut engine,
-        )
-        ;
+        );
         assert!(result.is_ok(), "Failed for label: {:?}", label);
     }
 }
@@ -749,8 +738,7 @@ fn test_missing_required_fields() {
         "policy_add",
         json!({"scope": "global"}),
         &mut engine,
-    )
-    ;
+    );
     // Should handle gracefully — either error or default
     // The important thing is it doesn't panic
     let _ = result;
@@ -765,8 +753,7 @@ fn test_wrong_types_in_args() {
         "risk_limit_set",
         json!({"label": "test", "max_value": "not a number"}),
         &mut engine,
-    )
-    ;
+    );
     // Should handle gracefully
     let _ = result;
 }
@@ -778,8 +765,7 @@ fn test_negative_risk_limit() {
         "risk_limit_set",
         json!({"label": "negative", "max_value": -1}),
         &mut engine,
-    )
-    ;
+    );
     // Should handle gracefully
     let _ = result;
 }
@@ -791,8 +777,7 @@ fn test_zero_risk_limit() {
         "risk_limit_set",
         json!({"label": "zero", "max_value": 0}),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
 }
 
@@ -803,8 +788,7 @@ fn test_massive_risk_limit() {
         "risk_limit_set",
         json!({"label": "huge", "max_value": f64::MAX}),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
 }
 
@@ -815,8 +799,7 @@ fn test_past_deadline_obligation() {
         "obligation_add",
         json!({"label": "overdue", "deadline": "2020-01-01T00:00:00Z"}),
         &mut engine,
-    )
-    ;
+    );
     // Should still create — deadline enforcement at check time
     assert!(result.is_ok());
 }
@@ -828,8 +811,7 @@ fn test_invalid_datetime_obligation() {
         "obligation_add",
         json!({"label": "bad date", "deadline": "not-a-date"}),
         &mut engine,
-    )
-    ;
+    );
     // Should handle gracefully
     let _ = result;
 }
@@ -843,8 +825,7 @@ fn test_all_severity_levels() {
             "violation_report",
             json!({"description": format!("test {}", sev), "severity": sev, "agent_id": "a1"}),
             &mut engine,
-        )
-        ;
+        );
         assert!(result.is_ok(), "Failed for severity: {}", sev);
     }
 }
@@ -857,8 +838,7 @@ fn test_all_policy_scopes() {
             "policy_add",
             json!({"label": format!("{} policy", scope), "scope": scope}),
             &mut engine,
-        )
-        ;
+        );
         assert!(result.is_ok(), "Failed for scope: {}", scope);
     }
 }
@@ -871,8 +851,7 @@ fn test_all_policy_actions() {
             "policy_add",
             json!({"label": format!("{} action", action), "action": action}),
             &mut engine,
-        )
-        ;
+        );
         assert!(result.is_ok(), "Failed for action: {}", action);
     }
 }
@@ -885,8 +864,7 @@ fn test_all_limit_types() {
             "risk_limit_set",
             json!({"label": format!("{} limit", lt), "max_value": 100, "limit_type": lt}),
             &mut engine,
-        )
-        ;
+        );
         assert!(result.is_ok(), "Failed for limit_type: {}", lt);
     }
 }
@@ -906,7 +884,7 @@ fn test_stats_after_bulk_load() {
             json!({"label": format!("P{}", i)}),
             &mut engine,
         )
-                .unwrap();
+        .unwrap();
     }
     for i in 0..15 {
         agentic_contract_mcp::tools::handle_tool_call(
@@ -914,7 +892,7 @@ fn test_stats_after_bulk_load() {
             json!({"label": format!("L{}", i), "max_value": i * 10 + 1}),
             &mut engine,
         )
-                .unwrap();
+        .unwrap();
     }
     for i in 0..10 {
         agentic_contract_mcp::tools::handle_tool_call(
@@ -922,7 +900,7 @@ fn test_stats_after_bulk_load() {
             json!({"label": format!("O{}", i), "deadline": future_dt()}),
             &mut engine,
         )
-                .unwrap();
+        .unwrap();
     }
     for i in 0..25 {
         agentic_contract_mcp::tools::handle_tool_call(
@@ -930,12 +908,12 @@ fn test_stats_after_bulk_load() {
             json!({"description": format!("V{}", i), "severity": "info", "agent_id": "a1"}),
             &mut engine,
         )
-                .unwrap();
+        .unwrap();
     }
 
     let stats =
         agentic_contract_mcp::tools::handle_tool_call("contract_stats", json!({}), &mut engine)
-                        .unwrap();
+            .unwrap();
 
     assert!(stats["policy_count"].as_u64().unwrap() >= 20);
     assert!(stats["risk_limit_count"].as_u64().unwrap() >= 15);
@@ -966,7 +944,7 @@ fn test_contract_create_sign_verify_list_get() {
         json!({"contract_id": &cid, "signer": "agent_a"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     assert_eq!(signed["signed"], true);
 
     // Verify
@@ -975,13 +953,13 @@ fn test_contract_create_sign_verify_list_get() {
         json!({"contract_id": &cid}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     assert!(verified.get("valid").is_some());
 
     // List
     let list =
         agentic_contract_mcp::tools::handle_tool_call("contract_list", json!({}), &mut engine)
-                        .unwrap();
+            .unwrap();
     assert!(list["count"].as_u64().unwrap() >= 1);
 
     // Get
@@ -990,6 +968,6 @@ fn test_contract_create_sign_verify_list_get() {
         json!({"id": &cid}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     assert_eq!(got["label"], "Service Agreement");
 }

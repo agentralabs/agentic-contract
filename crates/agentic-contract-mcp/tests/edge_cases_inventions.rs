@@ -100,8 +100,7 @@ fn test_policy_add_minimal() {
         "policy_add",
         json!({"label": "No deploys on Friday"}),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
     let val = result.unwrap();
     assert!(val.get("id").is_some());
@@ -120,8 +119,7 @@ fn test_policy_add_full() {
             "tags": ["security", "compliance"]
         }),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
 }
 
@@ -132,8 +130,7 @@ fn test_policy_check_allow() {
         "policy_check",
         json!({"action_type": "read_file", "scope": "global"}),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
     let val = result.unwrap();
     assert_eq!(val["allowed"], true);
@@ -148,14 +145,13 @@ fn test_policy_check_deny() {
         json!({"label": "deploy", "scope": "global", "action": "deny"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
 
     let result = agentic_contract_mcp::tools::handle_tool_call(
         "policy_check",
         json!({"action_type": "deploy", "scope": "global"}),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
     let val = result.unwrap();
     assert_eq!(val["allowed"], false);
@@ -182,7 +178,7 @@ fn test_risk_limit_set_and_check() {
         json!({"label": "API calls", "max_value": 100, "limit_type": "rate"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
 
     // Should not be exceeded
     let result = agentic_contract_mcp::tools::handle_tool_call(
@@ -190,7 +186,7 @@ fn test_risk_limit_set_and_check() {
         json!({"label": "api", "amount": 50}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     assert_eq!(result["exceeded"], false);
 }
 
@@ -198,8 +194,7 @@ fn test_risk_limit_set_and_check() {
 fn test_risk_limit_list_empty() {
     let mut engine = fresh_engine();
     let result =
-        agentic_contract_mcp::tools::handle_tool_call("risk_limit_list", json!({}), &mut engine)
-            ;
+        agentic_contract_mcp::tools::handle_tool_call("risk_limit_list", json!({}), &mut engine);
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["count"], 0);
 }
@@ -219,8 +214,7 @@ fn test_approval_request_invalid_rule() {
             "requestor": "agent_1"
         }),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_err());
 }
 
@@ -228,8 +222,7 @@ fn test_approval_request_invalid_rule() {
 fn test_approval_list_empty() {
     let mut engine = fresh_engine();
     let result =
-        agentic_contract_mcp::tools::handle_tool_call("approval_list", json!({}), &mut engine)
-            ;
+        agentic_contract_mcp::tools::handle_tool_call("approval_list", json!({}), &mut engine);
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["count"], 0);
 }
@@ -249,8 +242,7 @@ fn test_obligation_add() {
             "description": "Monthly compliance report"
         }),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
     let val = result.unwrap();
     assert!(val.get("id").is_some());
@@ -261,8 +253,7 @@ fn test_obligation_add() {
 fn test_obligation_check_all() {
     let mut engine = fresh_engine();
     let result =
-        agentic_contract_mcp::tools::handle_tool_call("obligation_check", json!({}), &mut engine)
-            ;
+        agentic_contract_mcp::tools::handle_tool_call("obligation_check", json!({}), &mut engine);
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["count"], 0);
 }
@@ -282,8 +273,7 @@ fn test_violation_report() {
             "agent_id": "agent_1"
         }),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
     let val = result.unwrap();
     assert!(val.get("id").is_some());
@@ -298,13 +288,13 @@ fn test_violation_list_by_severity() {
         json!({"description": "Info event", "severity": "info", "agent_id": "agent_1"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     agentic_contract_mcp::tools::handle_tool_call(
         "violation_report",
         json!({"description": "Critical breach", "severity": "critical", "agent_id": "agent_2"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
 
     // Filter by critical only
     let result = agentic_contract_mcp::tools::handle_tool_call(
@@ -312,7 +302,7 @@ fn test_violation_list_by_severity() {
         json!({"severity": "critical"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     assert_eq!(result["count"], 1);
 }
 
@@ -324,8 +314,7 @@ fn test_violation_list_by_severity() {
 fn test_unknown_tool_returns_error() {
     let mut engine = fresh_engine();
     let result =
-        agentic_contract_mcp::tools::handle_tool_call("nonexistent_tool", json!({}), &mut engine)
-            ;
+        agentic_contract_mcp::tools::handle_tool_call("nonexistent_tool", json!({}), &mut engine);
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("Unknown tool"));
 }
@@ -341,8 +330,7 @@ fn test_context_log() {
             "topic": "compliance"
         }),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
     assert_eq!(result.unwrap()["logged"], true);
 }
@@ -358,8 +346,7 @@ fn test_unicode_policy_label() {
         "policy_add",
         json!({"label": "禁止周五部署 🚫", "scope": "global", "action": "deny"}),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
 }
 
@@ -374,8 +361,7 @@ fn test_emoji_in_violation() {
             "agent_id": "agent_🤖"
         }),
         &mut engine,
-    )
-    ;
+    );
     assert!(result.is_ok());
 }
 
@@ -397,7 +383,7 @@ fn test_full_governance_lifecycle() {
         }),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     let contract_id = contract["id"].as_str().unwrap();
 
     // 2. Sign the contract
@@ -406,7 +392,7 @@ fn test_full_governance_lifecycle() {
         json!({"contract_id": contract_id, "signer": "admin"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     assert_eq!(signed["signed"], true);
 
     // 3. Add a policy
@@ -415,7 +401,7 @@ fn test_full_governance_lifecycle() {
         json!({"label": "deploy", "scope": "global", "action": "require_approval"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
 
     // 4. Check the policy
     let check = agentic_contract_mcp::tools::handle_tool_call(
@@ -423,7 +409,7 @@ fn test_full_governance_lifecycle() {
         json!({"action_type": "deploy"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     assert_eq!(check["allowed"], false); // RequireApproval counts as not immediately allowed
 
     // 5. Set a risk limit
@@ -432,7 +418,7 @@ fn test_full_governance_lifecycle() {
         json!({"label": "API calls per hour", "max_value": 1000, "limit_type": "rate"}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
 
     // 6. Add an obligation
     agentic_contract_mcp::tools::handle_tool_call(
@@ -440,7 +426,7 @@ fn test_full_governance_lifecycle() {
         json!({"label": "Weekly report", "deadline": future_dt()}),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
 
     // 7. Report a violation
     agentic_contract_mcp::tools::handle_tool_call(
@@ -452,12 +438,12 @@ fn test_full_governance_lifecycle() {
         }),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
 
     // 8. Verify stats
     let stats =
         agentic_contract_mcp::tools::handle_tool_call("contract_stats", json!({}), &mut engine)
-                        .unwrap();
+            .unwrap();
     assert!(stats["policy_count"].as_u64().unwrap() >= 2);
     assert_eq!(stats["risk_limit_count"], 1);
     assert_eq!(stats["violation_count"], 1);
@@ -480,15 +466,14 @@ fn test_condition_add_and_evaluate() {
         }),
         &mut engine,
     )
-        .unwrap();
+    .unwrap();
     let condition_id = result["id"].as_str().unwrap();
 
     let eval = agentic_contract_mcp::tools::handle_tool_call(
         "condition_evaluate",
         json!({"id": condition_id}),
         &mut engine,
-    )
-    ;
+    );
     assert!(eval.is_ok());
 }
 

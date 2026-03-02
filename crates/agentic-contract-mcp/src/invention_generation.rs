@@ -1006,9 +1006,8 @@ fn handle_contract_crystallize_validate(
     let error_penalty = errors.len() as f64 * 0.3;
     let warning_penalty = warnings.len() as f64 * 0.1;
     let suggestion_penalty = suggestions.len() as f64 * 0.02;
-    let validation_score = (1.0 - error_penalty - warning_penalty - suggestion_penalty)
-        .max(0.0)
-        .min(1.0);
+    let validation_score =
+        (1.0 - error_penalty - warning_penalty - suggestion_penalty).clamp(0.0, 1.0);
 
     let is_valid = errors.is_empty();
 
@@ -1156,7 +1155,7 @@ fn handle_contract_crystallize_evolve(
         .filter(|p| {
             p["direction"]
                 .as_str()
-                .map_or(false, |d| d.starts_with("tightened"))
+                .is_some_and(|d| d.starts_with("tightened"))
         })
         .count();
     let relaxed_count = evolved_policies
@@ -1174,9 +1173,7 @@ fn handle_contract_crystallize_evolve(
     } else {
         let relaxed_ratio = relaxed_count as f64 / total_evolved as f64;
         let tightened_ratio = tightened_count as f64 / total_evolved as f64;
-        (0.5 + relaxed_ratio * 0.5 - tightened_ratio * 0.3)
-            .max(0.0)
-            .min(1.0)
+        (0.5 + relaxed_ratio * 0.5 - tightened_ratio * 0.3).clamp(0.0, 1.0)
     };
 
     Ok(json!({
@@ -1291,7 +1288,7 @@ fn handle_policy_dna_extract(args: Value, engine: &mut ContractEngine) -> Result
         .iter()
         .filter(|v| {
             v.policy_id
-                .map_or(false, |pid| pid.to_string() == policy_id_str)
+                .is_some_and(|pid| pid.to_string() == policy_id_str)
         })
         .collect();
 
@@ -1303,7 +1300,7 @@ fn handle_policy_dna_extract(args: Value, engine: &mut ContractEngine) -> Result
         let penalty = severity_weight(&v.severity) * exponential_decay_days(v_age_days, 30.0);
         fitness -= penalty * 0.1;
     }
-    fitness = fitness.max(0.0).min(1.0);
+    fitness = fitness.clamp(0.0, 1.0);
 
     // ── Build DNA record ──
     let dna_id = ContractId::new();
@@ -1433,8 +1430,8 @@ fn handle_policy_dna_compare(args: Value, engine: &mut ContractEngine) -> Result
         .unwrap_or(json!(null));
 
     // Compute fitness for both
-    let fitness_a = compute_policy_fitness(engine, &policy_a_str, now);
-    let fitness_b = compute_policy_fitness(engine, &policy_b_str, now);
+    let fitness_a = compute_policy_fitness(engine, policy_a_str, now);
+    let fitness_b = compute_policy_fitness(engine, policy_b_str, now);
 
     // Relationship classification
     let relationship = if similarity > 0.9 {
@@ -1489,7 +1486,7 @@ fn handle_policy_dna_mutate(args: Value, engine: &mut ContractEngine) -> Result<
         .clone();
 
     let original_genes = extract_gene_vector(&policy, now);
-    let original_fitness = compute_policy_fitness(engine, &policy_id_str, now);
+    let original_fitness = compute_policy_fitness(engine, policy_id_str, now);
 
     // Optional crossover parent
     let crossover_genes = if let Some(cross_id) = crossover_id {
@@ -1530,11 +1527,11 @@ fn handle_policy_dna_mutate(args: Value, engine: &mut ContractEngine) -> Result<
         if should_mutate {
             let perturbation = gaussian_random(&mut seed) * 0.15; // std dev = 0.15
             let old_value = new_value;
-            new_value = (new_value + perturbation).max(0.0).min(1.0);
+            new_value = (new_value + perturbation).clamp(0.0, 1.0);
 
             mutations.push(PolicyMutation {
                 gene_name: gene.name.clone(),
-                old_value: old_value,
+                old_value,
                 new_value,
                 beneficial: false, // Will be determined after fitness check
             });
@@ -1654,7 +1651,7 @@ fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<
 
     // ── Initialize population ──
     // Create initial population from existing policies (with variation)
-    let gene_names = vec![
+    let gene_names = [
         "scope_breadth",
         "restriction_level",
         "tag_complexity",
@@ -1679,7 +1676,7 @@ fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<
         // Add random variation to create diversity
         for gene in genes.iter_mut() {
             let perturbation = gaussian_random(&mut seed) * 0.2;
-            *gene = (*gene + perturbation).max(0.0).min(1.0);
+            *gene = (*gene + perturbation).clamp(0.0, 1.0);
         }
 
         // Fitness based on gene balance (moderate genes = fitter)
@@ -1741,7 +1738,7 @@ fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<
             for gene in child_genes.iter_mut() {
                 if pseudo_random(&mut seed) < mutation_rate {
                     let perturbation = gaussian_random(&mut seed) * 0.1;
-                    *gene = (*gene + perturbation).max(0.0).min(1.0);
+                    *gene = (*gene + perturbation).clamp(0.0, 1.0);
                 }
             }
 
@@ -1754,7 +1751,7 @@ fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<
                 child_genes.iter().map(|v| (v - 0.5).powi(2)).sum::<f64>() / num_genes as f64;
             let balance_score = 1.0 - variance;
             let restriction = child_genes.get(1).copied().unwrap_or(0.5);
-            let scope = child_genes.get(0).copied().unwrap_or(0.5);
+            let scope = child_genes.first().copied().unwrap_or(0.5);
             let security_bonus = if restriction > 0.3 { 0.1 } else { 0.0 };
             let coverage_bonus = if scope > 0.3 { 0.05 } else { 0.0 };
             let fitness = (balance_score * 0.7
@@ -1982,7 +1979,7 @@ fn handle_policy_dna_lineage(args: Value, engine: &mut ContractEngine) -> Result
             / relatives.len() as f64
     };
 
-    let target_fitness = compute_policy_fitness(engine, &policy_id_str, now);
+    let target_fitness = compute_policy_fitness(engine, policy_id_str, now);
     let target_age = now
         .signed_duration_since(target_policy.created_at)
         .num_days();
@@ -2054,7 +2051,7 @@ fn compute_policy_fitness(engine: &ContractEngine, policy_id_str: &str, now: Dat
         .iter()
         .filter(|v| {
             v.policy_id
-                .map_or(false, |pid| pid.to_string() == policy_id_str)
+                .is_some_and(|pid| pid.to_string() == policy_id_str)
         })
         .collect();
 
@@ -2064,7 +2061,7 @@ fn compute_policy_fitness(engine: &ContractEngine, policy_id_str: &str, now: Dat
         let penalty = severity_weight(&v.severity) * exponential_decay_days(v_age_days, 30.0);
         fitness -= penalty * 0.1;
     }
-    fitness.max(0.0).min(1.0)
+    fitness.clamp(0.0, 1.0)
 }
 
 /// Tournament selection: pick the best of k random individuals from a population.
@@ -2336,7 +2333,7 @@ mod tests {
         assert_eq!(value["policy_label"], "Root Policy");
         let relatives = value["relatives"].as_array().unwrap();
         // The similar policy should appear; the different one may or may not
-        assert!(relatives.len() >= 1);
+        assert!(!relatives.is_empty());
         let stats = &value["lineage_statistics"];
         assert!(stats["total_policies"].as_u64().unwrap() == 3);
     }
