@@ -123,7 +123,12 @@ fn build_contract_context(engine: &ContractEngine) -> String {
     let pending: Vec<_> = f
         .approval_requests
         .iter()
-        .filter(|r| matches!(r.status, agentic_contract::approval::ApprovalStatus::Pending))
+        .filter(|r| {
+            matches!(
+                r.status,
+                agentic_contract::approval::ApprovalStatus::Pending
+            )
+        })
         .collect();
     if !pending.is_empty() {
         md.push_str("## Pending Approvals\n\n");
@@ -153,10 +158,7 @@ fn build_contract_context(engine: &ContractEngine) -> String {
             ));
         }
         if f.violations.len() > 10 {
-            md.push_str(&format!(
-                "- _...and {} more_\n",
-                f.violations.len() - 10
-            ));
+            md.push_str(&format!("- _...and {} more_\n", f.violations.len() - 10));
         }
         md.push('\n');
     }
