@@ -55,8 +55,7 @@ pub fn run(args: PolicyArgs, acon_path: &str) {
                 "session" => agentic_contract::PolicyScope::Session,
                 "agent" => agentic_contract::PolicyScope::Agent,
                 other => {
-                    eprintln!("Unknown scope: {}", other);
-                    return;
+                    crate::fail(&format!("Unknown scope: {}", other));
                 }
             };
             let action = match action.as_str() {
@@ -65,8 +64,7 @@ pub fn run(args: PolicyArgs, acon_path: &str) {
                 "require_approval" => agentic_contract::PolicyAction::RequireApproval,
                 "audit_only" => agentic_contract::PolicyAction::AuditOnly,
                 other => {
-                    eprintln!("Unknown action: {}", other);
-                    return;
+                    crate::fail(&format!("Unknown action: {}", other));
                 }
             };
 
@@ -84,8 +82,7 @@ pub fn run(args: PolicyArgs, acon_path: &str) {
                 "session" => agentic_contract::PolicyScope::Session,
                 "agent" => agentic_contract::PolicyScope::Agent,
                 other => {
-                    eprintln!("Unknown scope: {}", other);
-                    return;
+                    crate::fail(&format!("Unknown scope: {}", other));
                 }
             };
             let result = engine.check_policy(&action_type, scope);
