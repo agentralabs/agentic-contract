@@ -1,5 +1,6 @@
 //! AgenticContract MCP Server — policy engine for AI agents.
 
+mod ghost_bridge;
 mod greeting;
 mod invention_generation;
 mod invention_governance;

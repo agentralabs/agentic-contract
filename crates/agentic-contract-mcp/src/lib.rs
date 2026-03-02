@@ -1,3 +1,4 @@
+pub mod ghost_bridge;
 pub mod greeting;
 pub mod invention_generation;
 pub mod invention_governance;

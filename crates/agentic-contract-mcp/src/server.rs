@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use serde_json::{json, Value};
 
+use crate::ghost_bridge;
 use crate::greeting;
 use crate::invention_generation;
 use crate::invention_governance;
@@ -338,6 +339,9 @@ pub fn run_server() -> Result<(), Box<dyn std::error::Error>> {
 
     tracing::info!("AgenticContract MCP server started");
 
+    // Ghost bridge — sync context to AI coding assistants after each request
+    let mut ghost = ghost_bridge::GhostBridge::new();
+
     loop {
         if let Err(e) = runtime.enforce_storage_budget(&acon_path) {
             tracing::warn!("storage budget check failed: {}", e);
@@ -347,6 +351,9 @@ pub fn run_server() -> Result<(), Box<dyn std::error::Error>> {
             Ok(m) => m,
             Err(TransportError::Io(ref e)) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
                 tracing::info!("Client disconnected, saving before exit");
+                if let Some(ref mut g) = ghost {
+                    g.sync(&engine);
+                }
                 if let Err(e) = engine.save() {
                     tracing::error!("Failed to save on disconnect: {}", e);
                 }
@@ -641,6 +648,11 @@ pub fn run_server() -> Result<(), Box<dyn std::error::Error>> {
         };
 
         transport.write_message(&response.to_string())?;
+
+        // Sync ghost bridge after each request
+        if let Some(ref mut g) = ghost {
+            g.sync(&engine);
+        }
     }
 
     Ok(())
