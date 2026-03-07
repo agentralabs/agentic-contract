@@ -6,6 +6,9 @@
 
 pub mod approval;
 pub mod bridges;
+pub mod cache;
+pub mod metrics;
+pub mod query;
 pub mod condition;
 pub mod contract_engine;
 pub mod contracts;

@@ -22,53 +22,53 @@ pub const TOOL_DEFS: &[ToolDefinition] = &[
     ToolDefinition {
         name: "contract_crystallize",
         description: "Generate contract policies from a high-level intent description using pattern matching",
-        input_schema: r#"{"type":"object","properties":{"intent":{"type":"string","description":"High-level intent description (e.g. 'budget under 10k, safe deploys, rate limit API')"},"strictness":{"type":"string","enum":["permissive","moderate","restrictive"],"default":"moderate","description":"How strict the generated policies should be"}},"required":["intent"]}"#,
+        input_schema: r#"{"type":"object","properties":{"intent":{"type":"string","description":"High-level intent description (e.g. 'budget under 10k, safe deploys, rate limit API')"},"strictness":{"type":"string","enum":["permissive","moderate","restrictive"],"default":"moderate","description":"How strict the generated policies should be"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["intent"]}"#,
     },
     ToolDefinition {
         name: "contract_crystallize_merge",
         description: "Merge two crystallized contracts resolving conflicts with stricter-wins strategy",
-        input_schema: r#"{"type":"object","properties":{"contract_a":{"type":"string","description":"First crystallized contract ID"},"contract_b":{"type":"string","description":"Second crystallized contract ID"}},"required":["contract_a","contract_b"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_a":{"type":"string","description":"First crystallized contract ID"},"contract_b":{"type":"string","description":"Second crystallized contract ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_a","contract_b"]}"#,
     },
     ToolDefinition {
         name: "contract_crystallize_diff",
         description: "Compare two crystallized contracts showing additions, removals, and modifications",
-        input_schema: r#"{"type":"object","properties":{"contract_a":{"type":"string","description":"First crystallized contract ID"},"contract_b":{"type":"string","description":"Second crystallized contract ID"}},"required":["contract_a","contract_b"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_a":{"type":"string","description":"First crystallized contract ID"},"contract_b":{"type":"string","description":"Second crystallized contract ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_a","contract_b"]}"#,
     },
     ToolDefinition {
         name: "contract_crystallize_validate",
         description: "Validate a crystallized contract for completeness, conflicts, and unsupported actions",
-        input_schema: r#"{"type":"object","properties":{"intent":{"type":"string","description":"Intent to validate crystallization for"}},"required":["intent"]}"#,
+        input_schema: r#"{"type":"object","properties":{"intent":{"type":"string","description":"Intent to validate crystallization for"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["intent"]}"#,
     },
     ToolDefinition {
         name: "contract_crystallize_evolve",
         description: "Evolve a crystallized contract based on violation history to tighten or relax policies",
-        input_schema: r#"{"type":"object","properties":{"intent":{"type":"string","description":"Intent of the contract to evolve"},"agent_id":{"type":"string","description":"Agent whose violation history informs evolution"},"window_days":{"type":"integer","description":"Days of history to consider","default":30}},"required":["intent","agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"intent":{"type":"string","description":"Intent of the contract to evolve"},"agent_id":{"type":"string","description":"Agent whose violation history informs evolution"},"window_days":{"type":"integer","description":"Days of history to consider","default":30},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["intent","agent_id"]}"#,
     },
     // ── Invention 7: Policy DNA (5 tools) ────────────────────────────
     ToolDefinition {
         name: "policy_dna_extract",
         description: "Extract genetic representation of a policy with genes for scope, restriction, complexity, depth, and age",
-        input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to extract DNA from"}},"required":["policy_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to extract DNA from"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["policy_id"]}"#,
     },
     ToolDefinition {
         name: "policy_dna_compare",
         description: "Compare DNA of two policies using Euclidean distance and trait dominance analysis",
-        input_schema: r#"{"type":"object","properties":{"policy_a":{"type":"string","description":"First policy ID"},"policy_b":{"type":"string","description":"Second policy ID"}},"required":["policy_a","policy_b"]}"#,
+        input_schema: r#"{"type":"object","properties":{"policy_a":{"type":"string","description":"First policy ID"},"policy_b":{"type":"string","description":"Second policy ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["policy_a","policy_b"]}"#,
     },
     ToolDefinition {
         name: "policy_dna_mutate",
         description: "Simulate policy mutations with random gene perturbation, crossover, and fitness recalculation",
-        input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to mutate"},"mutation_rate":{"type":"number","description":"Probability of each gene mutating (0.0-1.0)","default":0.3},"crossover_policy_id":{"type":"string","description":"Optional second policy for crossover mutation"}},"required":["policy_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to mutate"},"mutation_rate":{"type":"number","description":"Probability of each gene mutating (0.0-1.0)","default":0.3},"crossover_policy_id":{"type":"string","description":"Optional second policy for crossover mutation"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["policy_id"]}"#,
     },
     ToolDefinition {
         name: "policy_dna_evolve",
         description: "Run genetic algorithm on policies with tournament selection, crossover, and mutation over N generations",
-        input_schema: r#"{"type":"object","properties":{"generations":{"type":"integer","description":"Number of generations to simulate","default":10},"population_size":{"type":"integer","description":"Population size per generation","default":20},"tournament_size":{"type":"integer","description":"Tournament selection size","default":3},"mutation_rate":{"type":"number","description":"Mutation rate per gene","default":0.2}}}"#,
+        input_schema: r#"{"type":"object","properties":{"generations":{"type":"integer","description":"Number of generations to simulate","default":10},"population_size":{"type":"integer","description":"Population size per generation","default":20},"tournament_size":{"type":"integer","description":"Tournament selection size","default":3},"mutation_rate":{"type":"number","description":"Mutation rate per gene","default":0.2},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "policy_dna_lineage",
         description: "Trace policy evolution lineage by DNA similarity to build a family tree",
-        input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to trace lineage for"},"similarity_threshold":{"type":"number","description":"Minimum DNA similarity to consider related (0.0-1.0)","default":0.6}},"required":["policy_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to trace lineage for"},"similarity_threshold":{"type":"number","description":"Minimum DNA similarity to consider related (0.0-1.0)","default":0.6},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["policy_id"]}"#,
     },
 ];
 
@@ -731,16 +731,14 @@ fn handle_contract_crystallize_diff(
     let common_labels: HashSet<String> = labels_a.intersection(&labels_b).cloned().collect();
     let mut modified: Vec<Value> = Vec::new();
     for label in &common_labels {
-        let pol_a = contract_a
-            .policies
-            .iter()
-            .find(|p| &p.label == label)
-            .unwrap();
-        let pol_b = contract_b
-            .policies
-            .iter()
-            .find(|p| &p.label == label)
-            .unwrap();
+        let pol_a = match contract_a.policies.iter().find(|p| &p.label == label) {
+            Some(p) => p,
+            None => continue,
+        };
+        let pol_b = match contract_b.policies.iter().find(|p| &p.label == label) {
+            Some(p) => p,
+            None => continue,
+        };
 
         let mut changes: Vec<Value> = Vec::new();
         if pol_a.action != pol_b.action {
@@ -809,16 +807,14 @@ fn handle_contract_crystallize_diff(
         .cloned()
         .collect();
     for label in &common_limit_labels {
-        let lim_a = contract_a
-            .risk_limits
-            .iter()
-            .find(|r| &r.label == label)
-            .unwrap();
-        let lim_b = contract_b
-            .risk_limits
-            .iter()
-            .find(|r| &r.label == label)
-            .unwrap();
+        let lim_a = match contract_a.risk_limits.iter().find(|r| &r.label == label) {
+            Some(r) => r,
+            None => continue,
+        };
+        let lim_b = match contract_b.risk_limits.iter().find(|r| &r.label == label) {
+            Some(r) => r,
+            None => continue,
+        };
         if (lim_a.max_value - lim_b.max_value).abs() > 1e-6 {
             limits_modified.push(json!({
                 "label": label,
@@ -1700,7 +1696,7 @@ fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<
         let best_idx = population
             .iter()
             .enumerate()
-            .max_by(|(_, a), (_, b)| a.fitness.partial_cmp(&b.fitness).unwrap())
+            .max_by(|(_, a), (_, b)| a.fitness.partial_cmp(&b.fitness).unwrap_or(std::cmp::Ordering::Equal))
             .map(|(i, _)| i)
             .unwrap_or(0);
         new_population.push(Individual {
@@ -1787,8 +1783,8 @@ fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<
     // ── Extract best individual ──
     let best = population
         .iter()
-        .max_by(|a, b| a.fitness.partial_cmp(&b.fitness).unwrap())
-        .unwrap();
+        .max_by(|a, b| a.fitness.partial_cmp(&b.fitness).unwrap_or(std::cmp::Ordering::Equal))
+        .ok_or_else(|| "empty population".to_string())?;
 
     let best_genes: Vec<Value> = gene_names
         .iter()
@@ -2108,7 +2104,7 @@ mod tests {
         // Should contain a spending-related policy
         let has_spending = policies
             .iter()
-            .any(|p| p["label"].as_str().unwrap().contains("Spending"));
+            .any(|p| p["label"].as_str().unwrap_or_default().contains("Spending"));
         assert!(has_spending);
     }
 
@@ -2212,8 +2208,8 @@ mod tests {
             similarity
         );
         assert!(
-            value["relationship"].as_str().unwrap() == "near_identical"
-                || value["relationship"].as_str().unwrap() == "closely_related"
+            value["relationship"].as_str().unwrap_or_default() == "near_identical"
+                || value["relationship"].as_str().unwrap_or_default() == "closely_related"
         );
     }
 
@@ -2406,7 +2402,7 @@ mod tests {
         let policies = value["policies"].as_array().unwrap();
         // Permissive should downgrade Deny to RequireApproval
         for p in policies {
-            let action = p["action"].as_str().unwrap();
+            let action = p["action"].as_str().unwrap_or_default();
             assert_ne!(
                 action, "Deny",
                 "Permissive should not produce Deny policies"
@@ -2427,7 +2423,7 @@ mod tests {
         let policies = value["policies"].as_array().unwrap();
         // Restrictive should upgrade AuditOnly to RequireApproval
         for p in policies {
-            let action = p["action"].as_str().unwrap();
+            let action = p["action"].as_str().unwrap_or_default();
             assert_ne!(action, "AuditOnly", "Restrictive should upgrade AuditOnly");
         }
     }

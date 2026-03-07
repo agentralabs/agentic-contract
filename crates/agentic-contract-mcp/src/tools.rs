@@ -57,180 +57,180 @@ pub const TOOLS: &[ToolDefinition] = &[
     ToolDefinition {
         name: "contract_create",
         description: "Create a new contract between agents or agent and user",
-        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Contract label"},"parties":{"type":"array","items":{"type":"string"},"description":"Parties involved"},"description":{"type":"string","description":"Contract description"},"tags":{"type":"array","items":{"type":"string"}}},"required":["label"]}"#,
+        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Contract label"},"parties":{"type":"array","items":{"type":"string"},"description":"Parties involved"},"description":{"type":"string","description":"Contract description"},"tags":{"type":"array","items":{"type":"string"}},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["label"]}"#,
     },
     ToolDefinition {
         name: "contract_sign",
         description: "Sign a contract to indicate acceptance",
-        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Contract ID to sign"},"signer":{"type":"string","description":"Identity of the signer"}},"required":["contract_id","signer"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Contract ID to sign"},"signer":{"type":"string","description":"Identity of the signer"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_id","signer"]}"#,
     },
     ToolDefinition {
         name: "contract_verify",
         description: "Verify a contract's validity and signature chain",
-        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Contract ID to verify"}},"required":["contract_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Contract ID to verify"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_id"]}"#,
     },
     ToolDefinition {
         name: "contract_list",
         description: "List contracts with optional status filter",
-        input_schema: r#"{"type":"object","properties":{"status":{"type":"string","enum":["active","expired","draft"]}}}"#,
+        input_schema: r#"{"type":"object","properties":{"status":{"type":"string","enum":["active","expired","draft"]},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "contract_get",
         description: "Get a specific contract by ID",
-        input_schema: r#"{"type":"object","properties":{"id":{"type":"string","description":"Contract ID"}},"required":["id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"id":{"type":"string","description":"Contract ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["id"]}"#,
     },
     // ── Policy tools ────────────────────────────────────────────
     ToolDefinition {
         name: "policy_add",
         description: "Add a policy rule governing agent behavior",
-        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Policy label"},"scope":{"type":"string","enum":["global","session","agent"],"default":"global"},"action":{"type":"string","enum":["allow","deny","require_approval","audit_only"],"default":"deny"},"description":{"type":"string","description":"Optional policy description"},"tags":{"type":"array","items":{"type":"string"}}},"required":["label"]}"#,
+        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Policy label"},"scope":{"type":"string","enum":["global","session","agent"],"default":"global"},"action":{"type":"string","enum":["allow","deny","require_approval","audit_only"],"default":"deny"},"description":{"type":"string","description":"Optional policy description"},"tags":{"type":"array","items":{"type":"string"}},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["label"]}"#,
     },
     ToolDefinition {
         name: "policy_check",
         description: "Check if an action is allowed under current policies",
-        input_schema: r#"{"type":"object","properties":{"action_type":{"type":"string","description":"Action to check"},"scope":{"type":"string","enum":["global","session","agent"],"default":"global"}},"required":["action_type"]}"#,
+        input_schema: r#"{"type":"object","properties":{"action_type":{"type":"string","description":"Action to check"},"scope":{"type":"string","enum":["global","session","agent"],"default":"global"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["action_type"]}"#,
     },
     ToolDefinition {
         name: "policy_list",
         description: "List active policies with optional scope filter",
-        input_schema: r#"{"type":"object","properties":{"scope":{"type":"string","enum":["global","session","agent"]}}}"#,
+        input_schema: r#"{"type":"object","properties":{"scope":{"type":"string","enum":["global","session","agent"]},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     // ── Risk limit tools ────────────────────────────────────────
     ToolDefinition {
         name: "risk_limit_set",
         description: "Set a risk limit threshold for a resource or action",
-        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"What this limit governs"},"limit_type":{"type":"string","enum":["rate","threshold","budget","count"],"default":"threshold"},"max_value":{"type":"number","description":"Maximum allowed value"},"window_secs":{"type":"integer","description":"Time window in seconds (for rate limits)"}},"required":["label","max_value"]}"#,
+        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"What this limit governs"},"limit_type":{"type":"string","enum":["rate","threshold","budget","count"],"default":"threshold"},"max_value":{"type":"number","description":"Maximum allowed value"},"window_secs":{"type":"integer","description":"Time window in seconds (for rate limits)"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["label","max_value"]}"#,
     },
     ToolDefinition {
         name: "risk_limit_check",
         description: "Check if an action would exceed risk limits",
-        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Limit label pattern to match"},"amount":{"type":"number","description":"Amount to check against limit"}},"required":["label","amount"]}"#,
+        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Limit label pattern to match"},"amount":{"type":"number","description":"Amount to check against limit"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["label","amount"]}"#,
     },
     ToolDefinition {
         name: "risk_limit_list",
         description: "List all risk limits with current values",
-        input_schema: r#"{"type":"object","properties":{}}"#,
+        input_schema: r#"{"type":"object","properties":{"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     // ── Approval tools ──────────────────────────────────────────
     ToolDefinition {
         name: "approval_request",
         description: "Request approval for a controlled action",
-        input_schema: r#"{"type":"object","properties":{"rule_id":{"type":"string","description":"Approval rule ID"},"action_description":{"type":"string","description":"What action needs approval"},"requestor":{"type":"string","description":"Who is requesting"}},"required":["rule_id","action_description","requestor"]}"#,
+        input_schema: r#"{"type":"object","properties":{"rule_id":{"type":"string","description":"Approval rule ID"},"action_description":{"type":"string","description":"What action needs approval"},"requestor":{"type":"string","description":"Who is requesting"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["rule_id","action_description","requestor"]}"#,
     },
     ToolDefinition {
         name: "approval_decide",
         description: "Approve or deny a pending approval request",
-        input_schema: r#"{"type":"object","properties":{"request_id":{"type":"string","description":"Approval request ID"},"decision":{"type":"string","enum":["approve","deny"]},"decider":{"type":"string","description":"Who is deciding"},"reason":{"type":"string","description":"Reason for the decision"}},"required":["request_id","decision","decider","reason"]}"#,
+        input_schema: r#"{"type":"object","properties":{"request_id":{"type":"string","description":"Approval request ID"},"decision":{"type":"string","enum":["approve","deny"]},"decider":{"type":"string","description":"Who is deciding"},"reason":{"type":"string","description":"Reason for the decision"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["request_id","decision","decider","reason"]}"#,
     },
     ToolDefinition {
         name: "approval_list",
         description: "List approval requests with optional status filter",
-        input_schema: r#"{"type":"object","properties":{"status":{"type":"string","enum":["pending","approved","denied","expired"]}}}"#,
+        input_schema: r#"{"type":"object","properties":{"status":{"type":"string","enum":["pending","approved","denied","expired"]},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     // ── Condition tools ─────────────────────────────────────────
     ToolDefinition {
         name: "condition_add",
         description: "Add a conditional execution rule",
-        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Condition label"},"condition_type":{"type":"string","enum":["threshold","time_based","dependency","custom"],"default":"custom"},"expression":{"type":"string","description":"Condition expression or description"}},"required":["label","expression"]}"#,
+        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Condition label"},"condition_type":{"type":"string","enum":["threshold","time_based","dependency","custom"],"default":"custom"},"expression":{"type":"string","description":"Condition expression or description"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["label","expression"]}"#,
     },
     ToolDefinition {
         name: "condition_evaluate",
         description: "Evaluate whether conditions are met for an action",
-        input_schema: r#"{"type":"object","properties":{"id":{"type":"string","description":"Condition ID to evaluate"}},"required":["id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"id":{"type":"string","description":"Condition ID to evaluate"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["id"]}"#,
     },
     // ── Obligation tools ────────────────────────────────────────
     ToolDefinition {
         name: "obligation_add",
         description: "Add an obligation that an agent must fulfill",
-        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"What must be done"},"deadline":{"type":"string","format":"date-time","description":"When it must be done by (ISO 8601)"},"description":{"type":"string","description":"Detailed description"}},"required":["label","deadline"]}"#,
+        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"What must be done"},"deadline":{"type":"string","format":"date-time","description":"When it must be done by (ISO 8601)"},"description":{"type":"string","description":"Detailed description"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["label","deadline"]}"#,
     },
     ToolDefinition {
         name: "obligation_check",
         description: "Check the status of obligations",
-        input_schema: r#"{"type":"object","properties":{"id":{"type":"string","description":"Obligation ID (optional, checks all if omitted)"}}}"#,
+        input_schema: r#"{"type":"object","properties":{"id":{"type":"string","description":"Obligation ID (optional, checks all if omitted)"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     // ── Violation tools ─────────────────────────────────────────
     ToolDefinition {
         name: "violation_list",
         description: "List recorded violations with optional severity filter",
-        input_schema: r#"{"type":"object","properties":{"severity":{"type":"string","enum":["info","warning","critical","fatal"]}}}"#,
+        input_schema: r#"{"type":"object","properties":{"severity":{"type":"string","enum":["info","warning","critical","fatal"]},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "violation_report",
         description: "Report a contract or policy violation",
-        input_schema: r#"{"type":"object","properties":{"description":{"type":"string","description":"What violation occurred"},"severity":{"type":"string","enum":["info","warning","critical","fatal"],"default":"warning"},"agent_id":{"type":"string","description":"Which agent violated"},"policy_id":{"type":"string","description":"Related policy ID"}},"required":["description","severity","agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"description":{"type":"string","description":"What violation occurred"},"severity":{"type":"string","enum":["info","warning","critical","fatal"],"default":"warning"},"agent_id":{"type":"string","description":"Which agent violated"},"policy_id":{"type":"string","description":"Related policy ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["description","severity","agent_id"]}"#,
     },
     // ── Context tool ────────────────────────────────────────────
     ToolDefinition {
         name: "contract_context_log",
         description: "Log the intent and context behind a contract action",
-        input_schema: r#"{"type":"object","properties":{"intent":{"type":"string","description":"Why this contract action is being performed"},"decision":{"type":"string","description":"What was decided or concluded"},"topic":{"type":"string","description":"Optional topic category"}},"required":["intent"]}"#,
+        input_schema: r#"{"type":"object","properties":{"intent":{"type":"string","description":"Why this contract action is being performed"},"decision":{"type":"string","description":"What was decided or concluded"},"topic":{"type":"string","description":"Optional topic category"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["intent"]}"#,
     },
     // ── Stats tool ────────────────────────────────────────────────
     ToolDefinition {
         name: "contract_stats",
         description: "Get summary statistics for the contract store",
-        input_schema: r#"{"type":"object","properties":{}}"#,
+        input_schema: r#"{"type":"object","properties":{"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "contract_ground",
         description: "Verify a claim has contract backing",
-        input_schema: r#"{"type":"object","properties":{"claim":{"type":"string"},"threshold":{"type":"number","default":0.35}},"required":["claim"]}"#,
+        input_schema: r#"{"type":"object","properties":{"claim":{"type":"string"},"threshold":{"type":"number","default":0.35},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["claim"]}"#,
     },
     ToolDefinition {
         name: "contract_evidence",
         description: "Get detailed evidence for a claim from contract records",
-        input_schema: r#"{"type":"object","properties":{"query":{"type":"string"},"max_results":{"type":"integer","default":10}},"required":["query"]}"#,
+        input_schema: r#"{"type":"object","properties":{"query":{"type":"string"},"max_results":{"type":"integer","default":10},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["query"]}"#,
     },
     ToolDefinition {
         name: "contract_suggest",
         description: "Find similar contract records for a query",
-        input_schema: r#"{"type":"object","properties":{"query":{"type":"string"},"limit":{"type":"integer","default":5}},"required":["query"]}"#,
+        input_schema: r#"{"type":"object","properties":{"query":{"type":"string"},"limit":{"type":"integer","default":5},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["query"]}"#,
     },
     ToolDefinition {
         name: "contract_workspace_create",
         description: "Create a multi-contract workspace",
-        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"}},"required":["workspace"]}"#,
+        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["workspace"]}"#,
     },
     ToolDefinition {
         name: "contract_workspace_add",
         description: "Add an .acon file to a workspace",
-        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"path":{"type":"string"},"role":{"type":"string"},"label":{"type":"string"}},"required":["workspace","path"]}"#,
+        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"path":{"type":"string"},"role":{"type":"string"},"label":{"type":"string"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["workspace","path"]}"#,
     },
     ToolDefinition {
         name: "contract_workspace_list",
         description: "List contexts in a contract workspace",
-        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"}},"required":["workspace"]}"#,
+        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["workspace"]}"#,
     },
     ToolDefinition {
         name: "contract_workspace_query",
         description: "Search across all contract contexts in a workspace",
-        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"query":{"type":"string"},"max_per_context":{"type":"integer","default":5}},"required":["workspace","query"]}"#,
+        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"query":{"type":"string"},"max_per_context":{"type":"integer","default":5},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["workspace","query"]}"#,
     },
     ToolDefinition {
         name: "contract_workspace_compare",
         description: "Compare a concept across contract contexts",
-        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"item":{"type":"string"},"max_per_context":{"type":"integer","default":5}},"required":["workspace","item"]}"#,
+        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"item":{"type":"string"},"max_per_context":{"type":"integer","default":5},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["workspace","item"]}"#,
     },
     ToolDefinition {
         name: "contract_workspace_xref",
         description: "Cross-reference where an item exists across contract contexts",
-        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"item":{"type":"string"}},"required":["workspace","item"]}"#,
+        input_schema: r#"{"type":"object","properties":{"workspace":{"type":"string"},"item":{"type":"string"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["workspace","item"]}"#,
     },
     ToolDefinition {
         name: "session_start",
         description: "Start a new contract interaction session",
-        input_schema: r#"{"type":"object","properties":{"session_id":{"type":"integer"},"metadata":{"type":"object"}}}"#,
+        input_schema: r#"{"type":"object","properties":{"session_id":{"type":"integer"},"metadata":{"type":"object"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "session_end",
         description: "End a contract interaction session",
-        input_schema: r#"{"type":"object","properties":{"session_id":{"type":"integer"}}}"#,
+        input_schema: r#"{"type":"object","properties":{"session_id":{"type":"integer"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "contract_session_resume",
         description: "Load context from recent contract sessions",
-        input_schema: r#"{"type":"object","properties":{"limit":{"type":"integer","default":5}}}"#,
+        input_schema: r#"{"type":"object","properties":{"limit":{"type":"integer","default":5},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     // NOTE: Invention tools (inventions 1-16) are defined in their own modules:
     // invention_visibility (1-5), invention_generation (6-7),

@@ -25,106 +25,106 @@ pub const TOOL_DEFS: &[ToolDefinition] = &[
     ToolDefinition {
         name: "policy_omniscience_query",
         description: "Get complete visibility into all applicable policies for an agent in a given context",
-        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to query policies for"},"context":{"type":"string","description":"Context for the query (e.g. 'deploy', 'data-access')"},"include_inactive":{"type":"boolean","description":"Whether to include expired/disabled policies","default":false}},"required":["agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to query policies for"},"context":{"type":"string","description":"Context for the query (e.g. 'deploy', 'data-access')"},"include_inactive":{"type":"boolean","description":"Whether to include expired/disabled policies","default":false},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_id"]}"#,
     },
     ToolDefinition {
         name: "policy_omniscience_diff",
         description: "Compare policy visibility between two agents showing permission differences",
-        input_schema: r#"{"type":"object","properties":{"agent_a":{"type":"string","description":"First agent ID"},"agent_b":{"type":"string","description":"Second agent ID"},"context":{"type":"string","description":"Optional context filter"}},"required":["agent_a","agent_b"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_a":{"type":"string","description":"First agent ID"},"agent_b":{"type":"string","description":"Second agent ID"},"context":{"type":"string","description":"Optional context filter"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_a","agent_b"]}"#,
     },
     ToolDefinition {
         name: "policy_omniscience_coverage",
         description: "Analyze policy coverage gaps identifying unprotected actions and scopes",
-        input_schema: r#"{"type":"object","properties":{"scope":{"type":"string","enum":["global","session","agent"],"description":"Scope to analyze coverage for"}}}"#,
+        input_schema: r#"{"type":"object","properties":{"scope":{"type":"string","enum":["global","session","agent"],"description":"Scope to analyze coverage for"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "policy_omniscience_conflicts",
         description: "Detect conflicting policies where allow and deny overlap on the same action pattern",
-        input_schema: r#"{"type":"object","properties":{"scope":{"type":"string","enum":["global","session","agent"],"description":"Scope to check for conflicts"}}}"#,
+        input_schema: r#"{"type":"object","properties":{"scope":{"type":"string","enum":["global","session","agent"],"description":"Scope to check for conflicts"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     // ── Invention 2: Risk Prophecy (4 tools) ──────────────────────────
     ToolDefinition {
         name: "risk_prophecy_forecast",
         description: "Predict future risk budget usage with exponential decay trend analysis",
-        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to forecast for"},"forecast_window_secs":{"type":"integer","description":"Forecast window in seconds","default":3600},"confidence_level":{"type":"number","description":"Confidence level for prediction interval (0.0-1.0)","default":0.95}},"required":["agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to forecast for"},"forecast_window_secs":{"type":"integer","description":"Forecast window in seconds","default":3600},"confidence_level":{"type":"number","description":"Confidence level for prediction interval (0.0-1.0)","default":0.95},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_id"]}"#,
     },
     ToolDefinition {
         name: "risk_prophecy_heatmap",
         description: "Generate risk heatmap across all limits showing temporal concentration of risk events",
-        input_schema: r#"{"type":"object","properties":{"window_secs":{"type":"integer","description":"Analysis window in seconds","default":86400},"bucket_count":{"type":"integer","description":"Number of time buckets for the heatmap","default":24}}}"#,
+        input_schema: r#"{"type":"object","properties":{"window_secs":{"type":"integer","description":"Analysis window in seconds","default":86400},"bucket_count":{"type":"integer","description":"Number of time buckets for the heatmap","default":24},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "risk_prophecy_threshold_alert",
         description: "Identify risk limits approaching their thresholds with time-to-breach estimates",
-        input_schema: r#"{"type":"object","properties":{"alert_threshold":{"type":"number","description":"Usage fraction (0.0-1.0) above which to alert","default":0.75}}}"#,
+        input_schema: r#"{"type":"object","properties":{"alert_threshold":{"type":"number","description":"Usage fraction (0.0-1.0) above which to alert","default":0.75},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "risk_prophecy_correlation",
         description: "Analyze correlations between different risk limits to identify coupled risks",
-        input_schema: r#"{"type":"object","properties":{"window_secs":{"type":"integer","description":"Correlation analysis window","default":604800}}}"#,
+        input_schema: r#"{"type":"object","properties":{"window_secs":{"type":"integer","description":"Correlation analysis window","default":604800},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     // ── Invention 3: Approval Telepathy (4 tools) ─────────────────────
     ToolDefinition {
         name: "approval_telepathy_predict",
         description: "Predict approval likelihood for an action using historical pattern analysis",
-        input_schema: r#"{"type":"object","properties":{"action":{"type":"string","description":"Action to predict approval for"},"requestor":{"type":"string","description":"Who would request the approval"}},"required":["action"]}"#,
+        input_schema: r#"{"type":"object","properties":{"action":{"type":"string","description":"Action to predict approval for"},"requestor":{"type":"string","description":"Who would request the approval"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["action"]}"#,
     },
     ToolDefinition {
         name: "approval_telepathy_optimize",
         description: "Suggest modifications to maximize approval probability with effort estimates",
-        input_schema: r#"{"type":"object","properties":{"action":{"type":"string","description":"Action to optimize for approval"},"max_suggestions":{"type":"integer","description":"Maximum number of suggestions","default":5}},"required":["action"]}"#,
+        input_schema: r#"{"type":"object","properties":{"action":{"type":"string","description":"Action to optimize for approval"},"max_suggestions":{"type":"integer","description":"Maximum number of suggestions","default":5},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["action"]}"#,
     },
     ToolDefinition {
         name: "approval_telepathy_timing",
         description: "Analyze optimal timing for submitting approval requests based on historical patterns",
-        input_schema: r#"{"type":"object","properties":{"action":{"type":"string","description":"Action to analyze timing for"},"window_hours":{"type":"integer","description":"Hours to analyze for optimal window","default":168}},"required":["action"]}"#,
+        input_schema: r#"{"type":"object","properties":{"action":{"type":"string","description":"Action to analyze timing for"},"window_hours":{"type":"integer","description":"Hours to analyze for optimal window","default":168},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["action"]}"#,
     },
     ToolDefinition {
         name: "approval_telepathy_bottleneck",
         description: "Identify approval process bottlenecks and slow-response approvers",
-        input_schema: r#"{"type":"object","properties":{"window_secs":{"type":"integer","description":"Analysis window in seconds","default":604800}}}"#,
+        input_schema: r#"{"type":"object","properties":{"window_secs":{"type":"integer","description":"Analysis window in seconds","default":604800},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     // ── Invention 4: Obligation Clairvoyance (4 tools) ────────────────
     ToolDefinition {
         name: "obligation_clairvoyance_forecast",
         description: "Forecast upcoming obligations with scheduling conflict detection and optimal order",
-        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to forecast for"},"window_secs":{"type":"integer","description":"Forecast window in seconds","default":86400},"include_completed":{"type":"boolean","description":"Include recently completed obligations","default":false}},"required":["agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to forecast for"},"window_secs":{"type":"integer","description":"Forecast window in seconds","default":86400},"include_completed":{"type":"boolean","description":"Include recently completed obligations","default":false},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_id"]}"#,
     },
     ToolDefinition {
         name: "obligation_clairvoyance_dependencies",
         description: "Map obligation dependency chains showing critical paths and potential cascading failures",
-        input_schema: r#"{"type":"object","properties":{"obligation_id":{"type":"string","description":"Root obligation to trace dependencies from"}},"required":["obligation_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"obligation_id":{"type":"string","description":"Root obligation to trace dependencies from"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["obligation_id"]}"#,
     },
     ToolDefinition {
         name: "obligation_clairvoyance_workload",
         description: "Analyze obligation workload distribution across agents with overload detection",
-        input_schema: r#"{"type":"object","properties":{"window_secs":{"type":"integer","description":"Analysis window","default":604800},"overload_threshold":{"type":"integer","description":"Number of obligations above which an agent is overloaded","default":10}}}"#,
+        input_schema: r#"{"type":"object","properties":{"window_secs":{"type":"integer","description":"Analysis window","default":604800},"overload_threshold":{"type":"integer","description":"Number of obligations above which an agent is overloaded","default":10},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "obligation_clairvoyance_risk",
         description: "Calculate risk scores for obligation fulfillment combining deadline proximity and complexity",
-        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to analyze"},"urgency_weight":{"type":"number","description":"Weight for deadline proximity (0.0-1.0)","default":0.6},"complexity_weight":{"type":"number","description":"Weight for effort complexity (0.0-1.0)","default":0.4}},"required":["agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to analyze"},"urgency_weight":{"type":"number","description":"Weight for deadline proximity (0.0-1.0)","default":0.6},"complexity_weight":{"type":"number","description":"Weight for effort complexity (0.0-1.0)","default":0.4},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_id"]}"#,
     },
     // ── Invention 5: Violation Precognition (4 tools) ─────────────────
     ToolDefinition {
         name: "violation_precognition_analyze",
         description: "Analyze a planned action for potential policy and risk-limit violations before execution",
-        input_schema: r#"{"type":"object","properties":{"planned_action":{"type":"string","description":"Action being planned"},"agent_id":{"type":"string","description":"Agent that would perform the action"}},"required":["planned_action"]}"#,
+        input_schema: r#"{"type":"object","properties":{"planned_action":{"type":"string","description":"Action being planned"},"agent_id":{"type":"string","description":"Agent that would perform the action"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["planned_action"]}"#,
     },
     ToolDefinition {
         name: "violation_precognition_batch",
         description: "Analyze multiple planned actions in sequence detecting cumulative violation risk",
-        input_schema: r#"{"type":"object","properties":{"actions":{"type":"array","items":{"type":"string"},"description":"Ordered list of planned actions"},"agent_id":{"type":"string","description":"Agent that would perform the actions"}},"required":["actions"]}"#,
+        input_schema: r#"{"type":"object","properties":{"actions":{"type":"array","items":{"type":"string"},"description":"Ordered list of planned actions"},"agent_id":{"type":"string","description":"Agent that would perform the actions"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["actions"]}"#,
     },
     ToolDefinition {
         name: "violation_precognition_alternatives",
         description: "Generate safe alternative actions when a planned action would cause violations",
-        input_schema: r#"{"type":"object","properties":{"planned_action":{"type":"string","description":"Action that may cause violations"},"max_alternatives":{"type":"integer","description":"Maximum alternatives to suggest","default":3}},"required":["planned_action"]}"#,
+        input_schema: r#"{"type":"object","properties":{"planned_action":{"type":"string","description":"Action that may cause violations"},"max_alternatives":{"type":"integer","description":"Maximum alternatives to suggest","default":3},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["planned_action"]}"#,
     },
     ToolDefinition {
         name: "violation_precognition_history_pattern",
         description: "Detect recurring violation patterns using time-series clustering of historical violations",
-        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to analyze patterns for"},"window_secs":{"type":"integer","description":"Historical window to analyze","default":2592000},"min_cluster_size":{"type":"integer","description":"Minimum violations to form a pattern","default":3}},"required":["agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to analyze patterns for"},"window_secs":{"type":"integer","description":"Historical window to analyze","default":2592000},"min_cluster_size":{"type":"integer","description":"Minimum violations to form a pattern","default":3},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_id"]}"#,
     },
 ];
 
@@ -2134,8 +2134,14 @@ fn handle_violation_precognition_history_pattern(
         .filter(|c| c.len() >= min_cluster_size)
         .map(|cluster| {
             let count = cluster.len();
-            let first = cluster.first().unwrap();
-            let last = cluster.last().unwrap();
+            let first = match cluster.first() {
+                Some(f) => f,
+                None => return json!({}),
+            };
+            let last = match cluster.last() {
+                Some(l) => l,
+                None => return json!({}),
+            };
 
             // Compute average time between violations
             let mut intervals = Vec::new();

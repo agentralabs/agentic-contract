@@ -25,107 +25,107 @@ pub const TOOL_DEFS: &[ToolDefinition] = &[
     ToolDefinition {
         name: "trust_gradient_evaluate",
         description: "Evaluate trust-weighted policy assessment for an agent and action",
-        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to evaluate trust for"},"action":{"type":"string","description":"Action to evaluate"}},"required":["agent_id","action"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to evaluate trust for"},"action":{"type":"string","description":"Action to evaluate"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_id","action"]}"#,
     },
     ToolDefinition {
         name: "trust_gradient_history",
         description: "Get trust evolution over time for an agent",
-        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to get trust history for"},"window_days":{"type":"integer","description":"Window in days to analyze","default":90}},"required":["agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to get trust history for"},"window_days":{"type":"integer","description":"Window in days to analyze","default":90},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_id"]}"#,
     },
     ToolDefinition {
         name: "trust_gradient_predict",
         description: "Predict future trust trajectory for an agent",
-        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to predict trust for"},"forecast_days":{"type":"integer","description":"Days to forecast ahead","default":30}},"required":["agent_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_id":{"type":"string","description":"Agent to predict trust for"},"forecast_days":{"type":"integer","description":"Days to forecast ahead","default":30},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_id"]}"#,
     },
     ToolDefinition {
         name: "trust_gradient_compare",
         description: "Compare trust profiles of two agents side-by-side",
-        input_schema: r#"{"type":"object","properties":{"agent_a":{"type":"string","description":"First agent ID"},"agent_b":{"type":"string","description":"Second agent ID"}},"required":["agent_a","agent_b"]}"#,
+        input_schema: r#"{"type":"object","properties":{"agent_a":{"type":"string","description":"First agent ID"},"agent_b":{"type":"string","description":"Second agent ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["agent_a","agent_b"]}"#,
     },
     // ── Invention 9: Collective Contracts (4 tools) ─────────────────────
     ToolDefinition {
         name: "collective_contract_create",
         description: "Create a multi-party governance contract with quorum rules",
-        input_schema: r#"{"type":"object","properties":{"parties":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"role":{"type":"string","default":"member"}},"required":["id","name"]},"description":"Parties involved"},"arbitration":{"type":"string","enum":["majority_vote","unanimous","third_party","automated"],"default":"majority_vote"},"quorum_ratio":{"type":"number","description":"Fraction of parties required to sign (0.0-1.0)","default":0.5}},"required":["parties"]}"#,
+        input_schema: r#"{"type":"object","properties":{"parties":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"role":{"type":"string","default":"member"}},"required":["id","name"]},"description":"Parties involved"},"arbitration":{"type":"string","enum":["majority_vote","unanimous","third_party","automated"],"default":"majority_vote"},"quorum_ratio":{"type":"number","description":"Fraction of parties required to sign (0.0-1.0)","default":0.5},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["parties"]}"#,
     },
     ToolDefinition {
         name: "collective_contract_sign",
         description: "Sign a collective contract as one of its parties",
-        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Collective contract ID"},"signer_id":{"type":"string","description":"Party ID of the signer"}},"required":["contract_id","signer_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Collective contract ID"},"signer_id":{"type":"string","description":"Party ID of the signer"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_id","signer_id"]}"#,
     },
     ToolDefinition {
         name: "collective_contract_status",
         description: "Get detailed status of a collective contract including signature progress",
-        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Collective contract ID"}},"required":["contract_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Collective contract ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_id"]}"#,
     },
     ToolDefinition {
         name: "collective_contract_arbitrate",
         description: "Initiate dispute resolution for a collective contract",
-        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Collective contract ID"},"dispute_description":{"type":"string","description":"Description of the dispute"},"filed_by":{"type":"string","description":"Party filing the dispute"}},"required":["contract_id","dispute_description","filed_by"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Collective contract ID"},"dispute_description":{"type":"string","description":"Description of the dispute"},"filed_by":{"type":"string","description":"Party filing the dispute"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_id","dispute_description","filed_by"]}"#,
     },
     // ── Invention 10: Temporal Contracts (4 tools) ──────────────────────
     ToolDefinition {
         name: "temporal_contract_create",
         description: "Create a time-evolving contract with governance level transitions",
-        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Contract label"},"initial_level":{"type":"string","enum":["conservative","moderate","permissive","autonomous"],"default":"conservative"},"transition_conditions":{"type":"array","items":{"type":"string"},"description":"Conditions for governance transitions"}},"required":["label"]}"#,
+        input_schema: r#"{"type":"object","properties":{"label":{"type":"string","description":"Contract label"},"initial_level":{"type":"string","enum":["conservative","moderate","permissive","autonomous"],"default":"conservative"},"transition_conditions":{"type":"array","items":{"type":"string"},"description":"Conditions for governance transitions"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["label"]}"#,
     },
     ToolDefinition {
         name: "temporal_contract_transition",
         description: "Evaluate and apply governance level transitions based on performance",
-        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Temporal contract ID"},"performance_score":{"type":"number","description":"Current performance score 0.0-1.0"}},"required":["contract_id","performance_score"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Temporal contract ID"},"performance_score":{"type":"number","description":"Current performance score 0.0-1.0"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_id","performance_score"]}"#,
     },
     ToolDefinition {
         name: "temporal_contract_history",
         description: "Get full history of governance transitions for a temporal contract",
-        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Temporal contract ID"}},"required":["contract_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Temporal contract ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_id"]}"#,
     },
     ToolDefinition {
         name: "temporal_contract_predict",
         description: "Predict when the next governance transition will occur",
-        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Temporal contract ID"}},"required":["contract_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"contract_id":{"type":"string","description":"Temporal contract ID"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["contract_id"]}"#,
     },
     // ── Invention 11: Contract Inheritance (4 tools) ────────────────────
     ToolDefinition {
         name: "contract_inheritance_create",
         description: "Create a parent-child relationship between policies with inheritance",
-        input_schema: r#"{"type":"object","properties":{"parent_id":{"type":"string","description":"Parent policy ID"},"child_id":{"type":"string","description":"Child policy ID"},"propagate":{"type":"boolean","description":"Whether parent changes propagate to child","default":true}},"required":["parent_id","child_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"parent_id":{"type":"string","description":"Parent policy ID"},"child_id":{"type":"string","description":"Child policy ID"},"propagate":{"type":"boolean","description":"Whether parent changes propagate to child","default":true},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["parent_id","child_id"]}"#,
     },
     ToolDefinition {
         name: "contract_inheritance_tree",
         description: "Visualize the full inheritance tree from a root policy",
-        input_schema: r#"{"type":"object","properties":{"root_id":{"type":"string","description":"Root policy ID to start traversal from"}},"required":["root_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"root_id":{"type":"string","description":"Root policy ID to start traversal from"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["root_id"]}"#,
     },
     ToolDefinition {
         name: "contract_inheritance_resolve",
         description:
             "Resolve the effective policy for a given scope by walking the inheritance chain",
-        input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to resolve effective rules for"},"scope":{"type":"string","description":"Scope context for resolution","default":"global"}},"required":["policy_id"]}"#,
+        input_schema: r#"{"type":"object","properties":{"policy_id":{"type":"string","description":"Policy ID to resolve effective rules for"},"scope":{"type":"string","description":"Scope context for resolution","default":"global"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["policy_id"]}"#,
     },
     ToolDefinition {
         name: "contract_inheritance_override",
         description: "Create an override in a child contract for a parent policy property",
-        input_schema: r#"{"type":"object","properties":{"inheritance_id":{"type":"string","description":"Inheritance relationship ID"},"policy_id":{"type":"string","description":"Policy to override"},"override_type":{"type":"string","enum":["allow_additional","restrict_further","modify_parameters"],"default":"modify_parameters"},"description":{"type":"string","description":"Description of the override"}},"required":["inheritance_id","policy_id","description"]}"#,
+        input_schema: r#"{"type":"object","properties":{"inheritance_id":{"type":"string","description":"Inheritance relationship ID"},"policy_id":{"type":"string","description":"Policy to override"},"override_type":{"type":"string","enum":["allow_additional","restrict_further","modify_parameters"],"default":"modify_parameters"},"description":{"type":"string","description":"Description of the override"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["inheritance_id","policy_id","description"]}"#,
     },
     // ── Invention 12: Smart Escalation (4 tools) ────────────────────────
     ToolDefinition {
         name: "smart_escalation_route",
         description: "Route an approval request to the optimal approver based on scoring",
-        input_schema: r#"{"type":"object","properties":{"description":{"type":"string","description":"What needs approval"},"urgency":{"type":"number","description":"Urgency level 0.0-1.0","default":0.5}},"required":["description"]}"#,
+        input_schema: r#"{"type":"object","properties":{"description":{"type":"string","description":"What needs approval"},"urgency":{"type":"number","description":"Urgency level 0.0-1.0","default":0.5},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}},"required":["description"]}"#,
     },
     ToolDefinition {
         name: "smart_escalation_history",
         description: "Analyze escalation patterns including response times and bottlenecks",
-        input_schema: r#"{"type":"object","properties":{"window_days":{"type":"integer","description":"Analysis window in days","default":30}}}"#,
+        input_schema: r#"{"type":"object","properties":{"window_days":{"type":"integer","description":"Analysis window in days","default":30},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "smart_escalation_predict",
         description: "Predict response time for an escalation based on historical data",
-        input_schema: r#"{"type":"object","properties":{"urgency":{"type":"number","description":"Urgency level 0.0-1.0","default":0.5},"approver_id":{"type":"string","description":"Specific approver to predict for (optional)"}}}"#,
+        input_schema: r#"{"type":"object","properties":{"urgency":{"type":"number","description":"Urgency level 0.0-1.0","default":0.5},"approver_id":{"type":"string","description":"Specific approver to predict for (optional)"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
     ToolDefinition {
         name: "smart_escalation_configure",
         description: "Configure escalation routing rules, approvers, and timeout policies",
-        input_schema: r#"{"type":"object","properties":{"add_approvers":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"domains":{"type":"array","items":{"type":"string"}}},"required":["id","name"]},"description":"Approvers to add"},"urgency_thresholds":{"type":"object","properties":{"low":{"type":"number"},"medium":{"type":"number"},"high":{"type":"number"},"critical":{"type":"number"}},"description":"Custom urgency bucket thresholds"},"timeout_secs":{"type":"integer","description":"Default timeout in seconds"}}}"#,
+        input_schema: r#"{"type":"object","properties":{"add_approvers":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"domains":{"type":"array","items":{"type":"string"}}},"required":["id","name"]},"description":"Approvers to add"},"urgency_thresholds":{"type":"object","properties":{"low":{"type":"number"},"medium":{"type":"number"},"high":{"type":"number"},"critical":{"type":"number"}},"description":"Custom urgency bucket thresholds"},"timeout_secs":{"type":"integer","description":"Default timeout in seconds"},"include_content":{"type":"boolean","default":false,"description":"Return full content (default: IDs only)"},"intent":{"type":"string","enum":["exists","ids","summary","fields","full"],"description":"Extraction intent level"},"since":{"type":"integer","description":"Only return changes since this Unix timestamp"},"token_budget":{"type":"integer","description":"Maximum token budget for response"},"max_results":{"type":"integer","default":10,"description":"Maximum number of results"},"cursor":{"type":"string","description":"Pagination cursor for next page"}}}"#,
     },
 ];
 
@@ -1096,7 +1096,7 @@ fn handle_collective_contract_create(
         created_at: now,
     };
 
-    let mut store = COLLECTIVE_CONTRACTS.lock().unwrap();
+    let mut store = COLLECTIVE_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     store.push(record);
 
     Ok(json!({
@@ -1129,7 +1129,7 @@ fn handle_collective_contract_sign(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let mut store = COLLECTIVE_CONTRACTS.lock().unwrap();
+    let mut store = COLLECTIVE_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter_mut()
         .find(|c| c.id == contract_id)
@@ -1196,7 +1196,7 @@ fn handle_collective_contract_status(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let store = COLLECTIVE_CONTRACTS.lock().unwrap();
+    let store = COLLECTIVE_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter()
         .find(|c| c.id == contract_id)
@@ -1282,7 +1282,7 @@ fn handle_collective_contract_arbitrate(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let mut store = COLLECTIVE_CONTRACTS.lock().unwrap();
+    let mut store = COLLECTIVE_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter_mut()
         .find(|c| c.id == contract_id)
@@ -1419,7 +1419,7 @@ fn handle_temporal_contract_create(
         created_at: now,
     };
 
-    let mut store = TEMPORAL_CONTRACTS.lock().unwrap();
+    let mut store = TEMPORAL_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     store.push(record);
 
     Ok(json!({
@@ -1452,7 +1452,7 @@ fn handle_temporal_contract_transition(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let mut store = TEMPORAL_CONTRACTS.lock().unwrap();
+    let mut store = TEMPORAL_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter_mut()
         .find(|c| c.id == contract_id)
@@ -1575,7 +1575,7 @@ fn handle_temporal_contract_history(
         .parse()
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
 
-    let store = TEMPORAL_CONTRACTS.lock().unwrap();
+    let store = TEMPORAL_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter()
         .find(|c| c.id == contract_id)
@@ -1674,7 +1674,7 @@ fn handle_temporal_contract_predict(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let store = TEMPORAL_CONTRACTS.lock().unwrap();
+    let store = TEMPORAL_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter()
         .find(|c| c.id == contract_id)
@@ -1843,7 +1843,7 @@ fn handle_contract_inheritance_create(
 
     // Check for circular inheritance
     {
-        let store = INHERITANCE_RECORDS.lock().unwrap();
+        let store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
         if has_circular_inheritance(&store, child_id, parent_id) {
             return Err(format!(
                 "Circular inheritance detected: {} -> {} would create a cycle",
@@ -1873,7 +1873,7 @@ fn handle_contract_inheritance_create(
     let parent_scope = format!("{:?}", parent.scope);
     let child_scope = format!("{:?}", child.scope);
 
-    let mut store = INHERITANCE_RECORDS.lock().unwrap();
+    let mut store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     store.push(record);
 
     Ok(json!({
@@ -1897,7 +1897,7 @@ fn handle_contract_inheritance_tree(
 ) -> Result<Value, String> {
     let root_id = require_id(&args, "root_id")?;
 
-    let store = INHERITANCE_RECORDS.lock().unwrap();
+    let store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
 
     // Build tree recursively
     fn build_tree_node(
@@ -2001,7 +2001,7 @@ fn handle_contract_inheritance_resolve(
         .and_then(|v| v.as_str())
         .unwrap_or("global");
 
-    let store = INHERITANCE_RECORDS.lock().unwrap();
+    let store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
 
     // Walk up the inheritance chain
     let mut chain: Vec<Value> = Vec::new();
@@ -2120,7 +2120,7 @@ fn handle_contract_inheritance_override(
     let now = Utc::now();
     let override_id = ContractId::new();
 
-    let mut store = INHERITANCE_RECORDS.lock().unwrap();
+    let mut store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     let record = store
         .iter_mut()
         .find(|r| r.id == inheritance_id)
@@ -2200,7 +2200,7 @@ fn handle_smart_escalation_route(
         .clamp(0.0, 1.0);
     let now = Utc::now();
 
-    let config = ESCALATION_CONFIG.lock().unwrap();
+    let config = ESCALATION_CONFIG.lock().map_err(|e| format!("lock poisoned: {e}"))?;
 
     if config.approvers.is_empty() {
         return Err("No approvers configured. Use smart_escalation_configure first.".to_string());
@@ -2450,7 +2450,7 @@ fn handle_smart_escalation_predict(
     let specific_approver = args.get("approver_id").and_then(|v| v.as_str());
     let now = Utc::now();
 
-    let config = ESCALATION_CONFIG.lock().unwrap();
+    let config = ESCALATION_CONFIG.lock().map_err(|e| format!("lock poisoned: {e}"))?;
 
     // Compute historical response times by urgency bucket
     let urgency_bucket = if urgency >= config.urgency_thresholds.critical {
@@ -2543,7 +2543,7 @@ fn handle_smart_escalation_configure(
     _engine: &mut ContractEngine,
 ) -> Result<Value, String> {
     let now = Utc::now();
-    let mut config = ESCALATION_CONFIG.lock().unwrap();
+    let mut config = ESCALATION_CONFIG.lock().map_err(|e| format!("lock poisoned: {e}"))?;
     let mut changes: Vec<String> = Vec::new();
 
     // Add approvers

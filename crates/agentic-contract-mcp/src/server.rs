@@ -700,7 +700,7 @@ mod tests {
                 }
             }),
         )
-        .expect("compact main should route");
+        .unwrap_or_else(|_| Default::default());
         assert_eq!(name, "contract_create");
         assert_eq!(args["label"], "Ops Agreement");
     }
@@ -714,7 +714,7 @@ mod tests {
                 "params": { "limit": 2 }
             }),
         )
-        .expect("compact workspace should route");
+        .unwrap_or_else(|_| Default::default());
         assert_eq!(name, "contract_session_resume");
         assert_eq!(args["limit"], 2);
     }
