@@ -1,0 +1,85 @@
+\begin{thebibliography}{10}
+
+\bibitem{anthropic2024claude}
+Anthropic.
+\newblock Claude: {AI} assistant by {Anthropic}, 2024.
+
+\bibitem{mcp2024}
+Anthropic.
+\newblock Model context protocol specification, 2024.
+
+\bibitem{casbin}
+{Casbin Contributors}.
+\newblock Casbin: An authorization library that supports access control models,
+  2023.
+
+\bibitem{chen2024agentcost}
+Yanqiao Chen and Wei Zhang.
+\newblock Understanding and controlling {AI} agent costs in production.
+\newblock arXiv preprint, 2024.
+
+\bibitem{cedar2023}
+Joseph~W. Cutler, Will Crichton, Jessica Guo, Daniel Simon, et~al.
+\newblock Cedar: A new language for expressive, fast, safe, and analyzable
+  authorization.
+\newblock In {\em Proceedings of the ACM on Programming Languages (OOPSLA)}.
+  ACM, 2023.
+
+\bibitem{criterion}
+Brook Heisler.
+\newblock Criterion.rs: Statistics-driven benchmarking library for {Rust},
+  2023.
+
+\bibitem{agentbench2023}
+Xiao Liu, Hao Yu, Hanchen Zhang, Yifan Xu, Xinhan Lei, Hanyu Lai, Yu~Gu,
+  Hangliang Ding, Kaiwen Men, Kejuan Yang, et~al.
+\newblock {AgentBench}: Evaluating {LLMs} as agents.
+\newblock In {\em International Conference on Learning Representations}, 2024.
+
+\bibitem{crewai2024}
+Jo\~{a}o Moura.
+\newblock {CrewAI}: Framework for orchestrating role-playing autonomous {AI}
+  agents, 2024.
+
+\bibitem{blake3}
+Jack O'Connor, Jean-Philippe Aumasson, Samuel Neves, and Zooko Wilcox-O'Hearn.
+\newblock {BLAKE3}: One function, fast everywhere, 2020.
+
+\bibitem{opa2018}
+{Open Policy Agent Contributors}.
+\newblock {OPA}: An open source, general-purpose policy engine.
+\newblock \url{https://www.openpolicyagent.org}, 2018.
+
+\bibitem{agenticmemory2026}
+Omoshola Owolabi.
+\newblock {AgenticMemory}: A binary graph format for persistent, portable, and
+  navigable {AI} agent memory, 2026.
+
+\bibitem{agentrasdk2026}
+Omoshola Owolabi.
+\newblock Agentra {SDK}: Unified trait system for {AI} agent infrastructure,
+  2026.
+
+\bibitem{zanzibar2019}
+Ruoming Pang, Ramon Langheinrich, Salvatore Suter, et~al.
+\newblock Zanzibar: Google's consistent, global authorization system.
+\newblock In {\em USENIX Annual Technical Conference}. USENIX Association,
+  2019.
+
+\bibitem{autogpt2023}
+Toran~Bruce Richards.
+\newblock {AutoGPT}: An autonomous {GPT-4} experiment, 2023.
+
+\bibitem{agents2024}
+Lei Wang, Chen Ma, Xueyang Feng, Zeyu Zhang, Hao Yang, Jingsen Zhang, Zhiyuan
+  Chen, Jiakai Tang, Xu~Chen, Yankai Lin, et~al.
+\newblock A survey on large language model based autonomous agents.
+\newblock {\em Frontiers of Computer Science}, 18(6), 2024.
+
+\bibitem{react2022}
+Shunyu Yao, Jeffrey Zhao, Dian Yu, Nan Du, Izhak Shafran, Karthik Narasimhan,
+  and Yuan Cao.
+\newblock {ReAct}: Synergizing reasoning and acting in language models.
+\newblock {\em International Conference on Learning Representations}, 2023.
+
+\end{thebibliography}

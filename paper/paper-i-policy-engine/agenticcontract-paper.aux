@@ -1,0 +1,108 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{chen2024agentcost}
+\citation{opa2018}
+\citation{cedar2023}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{mcp2024}
+\citation{anthropic2024claude}
+\citation{opa2018}
+\citation{cedar2023}
+\citation{zanzibar2019}
+\citation{casbin}
+\citation{agents2024}
+\citation{autogpt2023}
+\citation{crewai2024}
+\citation{agentbench2023}
+\citation{react2022}
+\citation{mcp2024}
+\citation{opa2018}
+\citation{cedar2023}
+\citation{zanzibar2019}
+\citation{casbin}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Ungoverned agent execution (left) versus AgenticContract-governed execution (right). Without governance, every action proceeds unchecked, leading to data loss, budget overruns, and untested deployments. With AgenticContract, every action passes through the policy engine in under 50\,ns, enabling real-time deny, approval gating, and budget enforcement with a complete audit trail.}}{2}{figure.caption.2}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:motivation}{{1}{2}{Ungoverned agent execution (left) versus AgenticContract-governed execution (right). Without governance, every action proceeds unchecked, leading to data loss, budget overruns, and untested deployments. With AgenticContract, every action passes through the policy engine in under 50\,ns, enabling real-time deny, approval gating, and budget enforcement with a complete audit trail}{figure.caption.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background and Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{Background and Related Work}{section.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Architecture}{2}{section.3}\protected@file@percent }
+\newlabel{sec:architecture}{{3}{2}{Architecture}{section.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of policy and governance systems. AgenticContract is the only system providing all six governance primitives in a single-file, zero-dependency, agent-native format with sub-microsecond latency.}}{3}{table.caption.3}\protected@file@percent }
+\newlabel{tab:comparison}{{1}{3}{Comparison of policy and governance systems. AgenticContract is the only system providing all six governance primitives in a single-file, zero-dependency, agent-native format with sub-microsecond latency}{table.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces AgenticContract architecture. Three integration surfaces (MCP, CLI, FFI) feed into the core \texttt  {ContractEngine}, which manages six governance primitive stores backed by a single \texttt  {.acon} binary file with BLAKE3 integrity verification.}}{3}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:architecture}{{2}{3}{AgenticContract architecture. Three integration surfaces (MCP, CLI, FFI) feed into the core \texttt {ContractEngine}, which manages six governance primitive stores backed by a single \texttt {.acon} binary file with BLAKE3 integrity verification}{figure.caption.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Governance Primitives}{3}{subsection.3.1}\protected@file@percent }
+\newlabel{sec:primitives}{{3.1}{3}{Governance Primitives}{subsection.3.1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.1}Policy Evaluation}{3}{subsubsection.3.1.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Six governance primitives with typed variants. Each entity is UUID-identified and timestamped with \texttt  {chrono::DateTime<Utc>}.}}{3}{table.caption.5}\protected@file@percent }
+\newlabel{tab:primitives}{{2}{3}{Six governance primitives with typed variants. Each entity is UUID-identified and timestamped with \texttt {chrono::DateTime<Utc>}}{table.caption.5}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.2}Risk Limit Tracking}{3}{subsubsection.3.1.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.3}Approval Workflow}{3}{subsubsection.3.1.3}\protected@file@percent }
+\citation{blake3}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Three-phase approval lifecycle. Rules define gates; requests capture pending actions; decisions record outcomes with decider identity and justification. Timeouts transition requests to expired status.}}{4}{figure.caption.6}\protected@file@percent }
+\newlabel{fig:approval}{{3}{4}{Three-phase approval lifecycle. Rules define gates; requests capture pending actions; decisions record outcomes with decider identity and justification. Timeouts transition requests to expired status}{figure.caption.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.4}Obligation Tracking}{4}{subsubsection.3.1.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.1.5}Violation Forensics}{4}{subsubsection.3.1.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Binary File Format}{4}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:format}{{3.2}{4}{Binary File Format}{subsection.3.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces The \texttt  {.acon} binary file format. A 116-byte fixed header contains magic bytes, version, entity counts for all 7 entity types, timestamps, and a BLAKE3 checksum over the JSON payload. Entity data is serialized as JSON within the binary envelope, enabling flexible schema evolution.}}{4}{figure.caption.7}\protected@file@percent }
+\newlabel{fig:fileformat}{{4}{4}{The \texttt {.acon} binary file format. A 116-byte fixed header contains magic bytes, version, entity counts for all 7 entity types, timestamps, and a BLAKE3 checksum over the JSON payload. Entity data is serialized as JSON within the binary envelope, enabling flexible schema evolution}{figure.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Governance composition model. An agent action first encounters policy evaluation (most-restrictive-wins). Allow triggers condition and risk limit checks; RequireApproval enters the three-phase approval workflow; Deny records a violation. Approved actions create obligations with deadlines. Risk limit exceedance and policy denials both produce immutable violation records, ensuring a complete audit trail regardless of the decision path.}}{4}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:composition}{{5}{4}{Governance composition model. An agent action first encounters policy evaluation (most-restrictive-wins). Allow triggers condition and risk limit checks; RequireApproval enters the three-phase approval workflow; Deny records a violation. Approved actions create obligations with deadlines. Risk limit exceedance and policy denials both produce immutable violation records, ensuring a complete audit trail regardless of the decision path}{figure.caption.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Governance Composition Model}{4}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:composition}{{3.3}{4}{Governance Composition Model}{subsection.3.3}{}}
+\citation{react2022}
+\citation{mcp2024}
+\citation{agentrasdk2026}
+\citation{criterion}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Integration Surface}{5}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Evaluation}{5}{section.4}\protected@file@percent }
+\newlabel{sec:evaluation}{{4}{5}{Evaluation}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Benchmark Setup}{5}{subsection.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Core operation latencies. All operations complete in under 1.1\,\textmu {}s. Policy evaluation and risk limit checks are under 50\,ns---within the noise floor of a single LLM token generation step (typically 10--50\,ms).}}{5}{table.caption.9}\protected@file@percent }
+\newlabel{tab:latency}{{3}{5}{Core operation latencies. All operations complete in under 1.1\,\textmu {}s. Policy evaluation and risk limit checks are under 50\,ns---within the noise floor of a single LLM token generation step (typically 10--50\,ms)}{table.caption.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Policy evaluation scaling. Each 10$\times $ increase in policy count produces approximately 10$\times $ increase in evaluation time, confirming $O(n)$ complexity with a per-policy cost stabilizing at $\sim $70\,ns.}}{5}{table.caption.10}\protected@file@percent }
+\newlabel{tab:scaling}{{4}{5}{Policy evaluation scaling. Each 10$\times $ increase in policy count produces approximately 10$\times $ increase in evaluation time, confirming $O(n)$ complexity with a per-policy cost stabilizing at $\sim $70\,ns}{table.caption.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Core Operation Latency}{5}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Scale Performance}{5}{subsection.4.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Policy evaluation time vs.\ policy count on a log--log scale. The measured data (blue) closely tracks the theoretical linear $O(n)$ baseline (gray dashed), confirming allocation-free iteration with a constant per-policy cost of approximately 70\,ns.}}{6}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:scaling}{{6}{6}{Policy evaluation time vs.\ policy count on a log--log scale. The measured data (blue) closely tracks the theoretical linear $O(n)$ baseline (gray dashed), confirming allocation-free iteration with a constant per-policy cost of approximately 70\,ns}{figure.caption.11}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces File I/O for 100 entities (50 policies + 50 risk limits). Save includes JSON serialization, BLAKE3 checksum computation, and atomic write (write-to-temporary then rename). Load includes file read, checksum verification, and JSON deserialization.}}{6}{table.caption.12}\protected@file@percent }
+\newlabel{tab:io}{{5}{6}{File I/O for 100 entities (50 policies + 50 risk limits). Save includes JSON serialization, BLAKE3 checksum computation, and atomic write (write-to-temporary then rename). Load includes file read, checksum verification, and JSON deserialization}{table.caption.12}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}File I/O Performance}{6}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Comparison with Existing Systems}{6}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Capacity Projections}{6}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Validation}{6}{subsection.4.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Projected file I/O scaling based on measured linear growth. File size scales at approximately 500 bytes per entity.}}{6}{table.caption.13}\protected@file@percent }
+\newlabel{tab:io-scale}{{6}{6}{Projected file I/O scaling based on measured linear growth. File size scales at approximately 500 bytes per entity}{table.caption.13}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Radar comparison across six dimensions. AgenticContract scores highest overall due to its purpose-built design for agent governance, though auditability is limited by single-writer constraints and agent-native integration relies on text-matching rather than a full policy language. OPA and Cedar excel at authorization expressiveness but lack governance depth (risk limits, obligations, violations) and agent-native integration.}}{6}{figure.caption.14}\protected@file@percent }
+\newlabel{fig:radar}{{7}{6}{Radar comparison across six dimensions. AgenticContract scores highest overall due to its purpose-built design for agent governance, though auditability is limited by single-writer constraints and agent-native integration relies on text-matching rather than a full policy language. OPA and Cedar excel at authorization expressiveness but lack governance depth (risk limits, obligations, violations) and agent-native integration}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{6}{section.5}\protected@file@percent }
+\newlabel{sec:discussion}{{5}{6}{Discussion}{section.5}{}}
+\citation{agenticmemory2026}
+\bibstyle{plain}
+\bibdata{agenticcontract-references}
+\bibcite{anthropic2024claude}{1}
+\bibcite{mcp2024}{2}
+\bibcite{casbin}{3}
+\bibcite{chen2024agentcost}{4}
+\bibcite{cedar2023}{5}
+\bibcite{criterion}{6}
+\bibcite{agentbench2023}{7}
+\bibcite{crewai2024}{8}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Real-world capacity projections for the \texttt  {.acon} format. At typical agent governance scales (10--100 policies), file size remains under 100\,KB, supporting years of governance history in a single file.}}{7}{table.caption.15}\protected@file@percent }
+\newlabel{tab:capacity}{{7}{7}{Real-world capacity projections for the \texttt {.acon} format. At typical agent governance scales (10--100 policies), file size remains under 100\,KB, supporting years of governance history in a single file}{table.caption.15}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{7}{section.6}\protected@file@percent }
+\newlabel{sec:conclusion}{{6}{7}{Conclusion}{section.6}{}}
+\bibcite{blake3}{9}
+\bibcite{opa2018}{10}
+\bibcite{agenticmemory2026}{11}
+\bibcite{agentrasdk2026}{12}
+\bibcite{zanzibar2019}{13}
+\bibcite{autogpt2023}{14}
+\bibcite{agents2024}{15}
+\bibcite{react2022}{16}
+\gdef \@abspage@last{8}
