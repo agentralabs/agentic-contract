@@ -1096,7 +1096,9 @@ fn handle_collective_contract_create(
         created_at: now,
     };
 
-    let mut store = COLLECTIVE_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let mut store = COLLECTIVE_CONTRACTS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     store.push(record);
 
     Ok(json!({
@@ -1129,7 +1131,9 @@ fn handle_collective_contract_sign(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let mut store = COLLECTIVE_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let mut store = COLLECTIVE_CONTRACTS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter_mut()
         .find(|c| c.id == contract_id)
@@ -1196,7 +1200,9 @@ fn handle_collective_contract_status(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let store = COLLECTIVE_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let store = COLLECTIVE_CONTRACTS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter()
         .find(|c| c.id == contract_id)
@@ -1282,7 +1288,9 @@ fn handle_collective_contract_arbitrate(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let mut store = COLLECTIVE_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let mut store = COLLECTIVE_CONTRACTS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter_mut()
         .find(|c| c.id == contract_id)
@@ -1419,7 +1427,9 @@ fn handle_temporal_contract_create(
         created_at: now,
     };
 
-    let mut store = TEMPORAL_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let mut store = TEMPORAL_CONTRACTS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     store.push(record);
 
     Ok(json!({
@@ -1452,7 +1462,9 @@ fn handle_temporal_contract_transition(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let mut store = TEMPORAL_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let mut store = TEMPORAL_CONTRACTS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter_mut()
         .find(|c| c.id == contract_id)
@@ -1575,7 +1587,9 @@ fn handle_temporal_contract_history(
         .parse()
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
 
-    let store = TEMPORAL_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let store = TEMPORAL_CONTRACTS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter()
         .find(|c| c.id == contract_id)
@@ -1674,7 +1688,9 @@ fn handle_temporal_contract_predict(
         .map_err(|e| format!("Invalid contract_id: {}", e))?;
     let now = Utc::now();
 
-    let store = TEMPORAL_CONTRACTS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let store = TEMPORAL_CONTRACTS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     let contract = store
         .iter()
         .find(|c| c.id == contract_id)
@@ -1843,7 +1859,9 @@ fn handle_contract_inheritance_create(
 
     // Check for circular inheritance
     {
-        let store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+        let store = INHERITANCE_RECORDS
+            .lock()
+            .map_err(|e| format!("lock poisoned: {e}"))?;
         if has_circular_inheritance(&store, child_id, parent_id) {
             return Err(format!(
                 "Circular inheritance detected: {} -> {} would create a cycle",
@@ -1873,7 +1891,9 @@ fn handle_contract_inheritance_create(
     let parent_scope = format!("{:?}", parent.scope);
     let child_scope = format!("{:?}", child.scope);
 
-    let mut store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let mut store = INHERITANCE_RECORDS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     store.push(record);
 
     Ok(json!({
@@ -1897,7 +1917,9 @@ fn handle_contract_inheritance_tree(
 ) -> Result<Value, String> {
     let root_id = require_id(&args, "root_id")?;
 
-    let store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let store = INHERITANCE_RECORDS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
 
     // Build tree recursively
     fn build_tree_node(
@@ -2001,7 +2023,9 @@ fn handle_contract_inheritance_resolve(
         .and_then(|v| v.as_str())
         .unwrap_or("global");
 
-    let store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let store = INHERITANCE_RECORDS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
 
     // Walk up the inheritance chain
     let mut chain: Vec<Value> = Vec::new();
@@ -2120,7 +2144,9 @@ fn handle_contract_inheritance_override(
     let now = Utc::now();
     let override_id = ContractId::new();
 
-    let mut store = INHERITANCE_RECORDS.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let mut store = INHERITANCE_RECORDS
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     let record = store
         .iter_mut()
         .find(|r| r.id == inheritance_id)
@@ -2200,7 +2226,9 @@ fn handle_smart_escalation_route(
         .clamp(0.0, 1.0);
     let now = Utc::now();
 
-    let config = ESCALATION_CONFIG.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let config = ESCALATION_CONFIG
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
 
     if config.approvers.is_empty() {
         return Err("No approvers configured. Use smart_escalation_configure first.".to_string());
@@ -2450,7 +2478,9 @@ fn handle_smart_escalation_predict(
     let specific_approver = args.get("approver_id").and_then(|v| v.as_str());
     let now = Utc::now();
 
-    let config = ESCALATION_CONFIG.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let config = ESCALATION_CONFIG
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
 
     // Compute historical response times by urgency bucket
     let urgency_bucket = if urgency >= config.urgency_thresholds.critical {
@@ -2543,7 +2573,9 @@ fn handle_smart_escalation_configure(
     _engine: &mut ContractEngine,
 ) -> Result<Value, String> {
     let now = Utc::now();
-    let mut config = ESCALATION_CONFIG.lock().map_err(|e| format!("lock poisoned: {e}"))?;
+    let mut config = ESCALATION_CONFIG
+        .lock()
+        .map_err(|e| format!("lock poisoned: {e}"))?;
     let mut changes: Vec<String> = Vec::new();
 
     // Add approvers

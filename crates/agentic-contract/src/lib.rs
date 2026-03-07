@@ -7,16 +7,16 @@
 pub mod approval;
 pub mod bridges;
 pub mod cache;
-pub mod metrics;
-pub mod query;
 pub mod condition;
 pub mod contract_engine;
 pub mod contracts;
 pub mod error;
 pub mod file_format;
 pub mod inventions;
+pub mod metrics;
 pub mod obligation;
 pub mod policy;
+pub mod query;
 pub mod risk_limit;
 pub mod violation;
 

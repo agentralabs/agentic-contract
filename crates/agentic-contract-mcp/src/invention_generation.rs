@@ -1696,7 +1696,11 @@ fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<
         let best_idx = population
             .iter()
             .enumerate()
-            .max_by(|(_, a), (_, b)| a.fitness.partial_cmp(&b.fitness).unwrap_or(std::cmp::Ordering::Equal))
+            .max_by(|(_, a), (_, b)| {
+                a.fitness
+                    .partial_cmp(&b.fitness)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
             .map(|(i, _)| i)
             .unwrap_or(0);
         new_population.push(Individual {
@@ -1783,7 +1787,11 @@ fn handle_policy_dna_evolve(args: Value, engine: &mut ContractEngine) -> Result<
     // ── Extract best individual ──
     let best = population
         .iter()
-        .max_by(|a, b| a.fitness.partial_cmp(&b.fitness).unwrap_or(std::cmp::Ordering::Equal))
+        .max_by(|a, b| {
+            a.fitness
+                .partial_cmp(&b.fitness)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })
         .ok_or_else(|| "empty population".to_string())?;
 
     let best_genes: Vec<Value> = gene_names
