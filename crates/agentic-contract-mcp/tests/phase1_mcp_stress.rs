@@ -438,19 +438,19 @@ fn test_transport_write_framing() {
         transport.write_message("hello").unwrap();
     }
     let written = String::from_utf8(output).unwrap();
-    assert!(written.starts_with("Content-Length: 5\r\n\r\nhello"));
+    assert_eq!(written, "Content-Length: 5\r\n\r\nhello");
 }
 
 #[test]
-fn test_transport_missing_content_length() {
-    let bad_input = b"No-Header: here\r\n\r\n{}";
+fn test_transport_plain_json_line_works() {
+    let plain_input = b"{\"jsonrpc\":\"2.0\",\"method\":\"initialize\"}\n";
     let mut output = Vec::new();
     let mut transport = agentic_contract_mcp::stdio::StdioTransport::new(
-        Cursor::new(bad_input.to_vec()),
+        Cursor::new(plain_input.to_vec()),
         &mut output,
     );
-    let result = transport.read_message();
-    assert!(result.is_err());
+    let result = transport.read_message().unwrap();
+    assert_eq!(result, "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\"}");
 }
 
 #[test]

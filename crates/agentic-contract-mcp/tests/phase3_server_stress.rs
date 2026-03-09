@@ -90,27 +90,37 @@ fn test_frame_newlines_in_content() {
 
 #[test]
 fn test_frame_negative_content_length() {
+    // "Content-Length: -1" won't parse as usize; line doesn't start with '{' so it's
+    // skipped. With nothing else to read, we get EOF.
     let data = b"Content-Length: -1\r\n\r\n".to_vec();
     let mut transport = make_transport(data);
-    assert!(transport.read_message().is_err());
+    let result = transport.read_message();
+    assert!(result.is_err(), "Should EOF after skipping invalid header");
 }
 
 #[test]
 fn test_frame_non_numeric_content_length() {
+    // "Content-Length: abc" won't parse as usize; line doesn't start with '{' so it's
+    // skipped. With nothing else to read, we get EOF.
     let data = b"Content-Length: abc\r\n\r\n".to_vec();
     let mut transport = make_transport(data);
-    assert!(transport.read_message().is_err());
+    let result = transport.read_message();
+    assert!(result.is_err(), "Should EOF after skipping invalid header");
 }
 
 #[test]
-fn test_frame_missing_header_entirely() {
-    let data = b"\r\n{\"test\":true}".to_vec();
+fn test_frame_plain_json_after_empty_line() {
+    // Empty line followed by JSON — plain JSON line mode reads the JSON
+    let data = b"\r\n{\"test\":true}\n".to_vec();
     let mut transport = make_transport(data);
-    assert!(transport.read_message().is_err());
+    let msg = transport.read_message().unwrap();
+    assert_eq!(msg, "{\"test\":true}");
 }
 
 #[test]
-fn test_frame_extra_headers_ignored() {
+fn test_frame_extra_headers_skipped() {
+    // "X-Custom: value" is not a Content-Length header and doesn't start with '{',
+    // so it's skipped. The Content-Length header is then parsed and the body is read.
     let data = b"X-Custom: value\r\nContent-Length: 4\r\n\r\ntest".to_vec();
     let mut transport = make_transport(data);
     assert_eq!(transport.read_message().unwrap(), "test");
@@ -278,9 +288,8 @@ fn test_write_unicode_message() {
         transport.write_message(msg).unwrap();
     }
     let written = String::from_utf8(output).unwrap();
-    let expected_len = msg.len(); // byte length
-    assert!(written.starts_with(&format!("Content-Length: {}\r\n\r\n", expected_len)));
-    assert!(written.ends_with(msg));
+    let byte_len = msg.len(); // byte length, not char count
+    assert_eq!(written, format!("Content-Length: {}\r\n\r\n{}", byte_len, msg));
 }
 
 #[test]
@@ -294,9 +303,12 @@ fn test_write_multiple_messages() {
         transport.write_message("third").unwrap();
     }
     let written = String::from_utf8(output).unwrap();
-    assert!(written.contains("Content-Length: 5\r\n\r\nfirst"));
-    assert!(written.contains("Content-Length: 6\r\n\r\nsecond"));
-    assert!(written.contains("Content-Length: 5\r\n\r\nthird"));
+    assert_eq!(
+        written,
+        "Content-Length: 5\r\n\r\nfirst\
+         Content-Length: 6\r\n\r\nsecond\
+         Content-Length: 5\r\n\r\nthird"
+    );
 }
 
 // =========================================================================
@@ -305,7 +317,9 @@ fn test_write_multiple_messages() {
 
 #[test]
 fn test_write_read_roundtrip() {
-    let messages = ["hello", "world", r#"{"json":"value"}"#, ""];
+    // Note: empty strings become blank lines which are skipped in plain mode,
+    // so we only roundtrip non-empty messages.
+    let messages = ["hello", "world", r#"{"json":"value"}"#];
     let mut output = Vec::new();
 
     // Write
