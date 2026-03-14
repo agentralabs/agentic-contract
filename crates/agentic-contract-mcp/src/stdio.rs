@@ -103,11 +103,11 @@ impl<R: Read, W: Write> StdioTransport<R, W> {
         }
     }
 
-    /// Write a JSON message with Content-Length framing (MCP specification).
+    /// Write a JSON message as a newline-delimited line (raw JSON-RPC).
+    /// This is compatible with all MCP clients including Hydra's stdio spawner.
     pub fn write_message(&mut self, content: &str) -> Result<(), TransportError> {
-        let header = format!("Content-Length: {}\r\n\r\n", content.len());
-        self.writer.write_all(header.as_bytes())?;
         self.writer.write_all(content.as_bytes())?;
+        self.writer.write_all(b"\n")?;
         self.writer.flush()?;
         Ok(())
     }
@@ -137,7 +137,7 @@ mod tests {
 
         transport.write_message("hello").unwrap();
         let written = String::from_utf8(output).unwrap();
-        assert_eq!(written, "Content-Length: 5\r\n\r\nhello");
+        assert_eq!(written, "hello\n");
     }
 
     #[test]
